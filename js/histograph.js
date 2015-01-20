@@ -1,9 +1,13 @@
 // Examples:
 //  Static: http://bl.ocks.org/mbostock/1667139
 
+var histograph = "http://localhost:3000/";
+
 var width = window.innerWidth, height = window.innerHeight;
 
 var THRESHOLD = 2;
+
+var circleRadius = 6;
 
 var resizeTimer;
 var nodes = {},
@@ -31,8 +35,8 @@ function tick() {
   text.attr("transform", transform);
   link.attr("x1", function(d) { return d.source.x; })
       .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; });
+      .attr("x2", function(d) { return minusCircleRadiusX({x: d.source.x, y: d.source.y}, {x: d.target.x, y: d.target.y}); })
+      .attr("y2", function(d) { return minusCircleRadiusY({x: d.source.x, y: d.source.y}, {x: d.target.x, y: d.target.y}); });
 }
 
 function transform(d) {
@@ -52,7 +56,7 @@ function resize() {
 
 function getData() {
 
-  d3.json("http://localhost:3000/test-source1/2", function(json) {
+  d3.json(histograph + "test-source1/2", function(json) {
 
     width = window.innerWidth, height = window.innerHeight;
 
@@ -123,10 +127,20 @@ function getData() {
   });
 }
 
-function update() {
+function minusCircleRadiusX(source, target) {
+  var l = Math.sqrt(Math.pow(target.x - source.x, 2) + Math.pow(target.y - source.y, 2)),
+      c = (l - circleRadius * 2) / l;
+  return (target.x - source.x) * c + source.x;
+}
 
-  force
-       .nodes(d3.values(nodes))
+function minusCircleRadiusY(source, target) {
+  var l = Math.sqrt(Math.pow(target.x - source.x, 2) + Math.pow(target.y - source.y, 2)),
+      c = (l - circleRadius * 2) / l;
+  return (target.y - source.y) * c + source.y;
+}
+
+function update() {
+  force.nodes(d3.values(nodes))
        .links(d3.values(links));
 
   // Per-type markers, as they don't inherit styles.
@@ -149,9 +163,10 @@ function update() {
   link.enter().append("line")
       .attr("x1", function(d) { return d.source.x; })
       .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; })
-      .attr("id", function(d, i) { return "path" + i; });
+      .attr("x2", function(d) { return minusCircleRadiusX({x: d.source.x, y: d.source.y}, {x: d.target.x, y: d.target.y}); })
+      .attr("y2", function(d) { return minusCircleRadiusY({x: d.source.x, y: d.source.y}, {x: d.target.x, y: d.target.y}); })
+      .attr("id", function(d, i) { return "path" + i; })
+      .style("marker-end", "url(#markerArrow");
   link.exit().remove();
 
   // var pathText = linkG.selectAll("text")
@@ -173,7 +188,7 @@ function update() {
 
   circle.enter().append("circle")
       .attr("transform", transform)
-      .attr("r", 6)
+      .attr("r", circleRadius)
       .on("click", onclick)
       .call(force.drag);
   circle.exit().remove();
@@ -188,7 +203,6 @@ function update() {
   text.exit().remove();
 
   force.start();
-
 }
 
 getData();

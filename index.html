@@ -14,16 +14,22 @@
   <div class="container">
     <div class="row">
       <div class="six columns">
-        <label for="uri-input">URI of PiT:</label>
+        <label for="uri-input">Search by URI:</label>
         <input class="u-full-width" type="text" placeholder="URI" id="uri-input">
       </div>
       <div class="six columns">
-        <label for="name-input">Search PiT by name:</label>
-        <input class="u-full-width" type="text" placeholder="Search" id="name-input">
+        <label for="name-input">Search by name:</label>
+        <input class="u-full-width" type="text" placeholder="Name" id="name-input">
       </div>
     </div>
   </div>
   <svg id="graph">
+    <defs>
+      <marker id='markerArrow' orient='auto' markerWidth='4' markerHeight='8'
+              refX='0.2' refY='4'>
+        <path d='M0,0 V8 L4,4 Z' />
+      </marker>
+    </defs>
   </svg>
   <script src="js/histograph.js" charset="utf-8"></script>
 </body>

@@ -95,6 +95,10 @@ body {
   stroke-width: 1.5px;
 }
 
+marker {
+  fill: #aaa;
+}
+
 #graph #licensing {
   fill: green;
 }
