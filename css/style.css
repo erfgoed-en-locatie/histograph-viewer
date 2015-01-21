@@ -89,7 +89,7 @@ body {
   z-index: -1;
 }
 
-#graph line {
+#graph path {
   fill: none;
   stroke: #aaa;
   stroke-width: 1.5px;
