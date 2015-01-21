@@ -57,7 +57,7 @@ function resize() {
 function getData(type, query) {
 
   d3.json(histograph + query, function(json) {
-    if (json && json.nodes && Object.keys(json.nodes).length > 0 && json.links && json.links.length > 0) {
+    if (json && json.nodes && Object.keys(json.nodes).length > 0 && json.links && Object.keys(json.links).length > 0) {
 
       location.hash = "uri=" + query;
 
@@ -67,7 +67,9 @@ function getData(type, query) {
       width = window.innerWidth, height = window.innerHeight;
 
       // Compute the distinct nodes from the links.
-      json.links.forEach(function(link) {
+      for (var linkId in json.links) {
+
+        var link = json.links[linkId];
 
         var source = nodes[link.source] || (nodes[link.source] = {
           uri: json.nodes[link.source].uri,
@@ -96,7 +98,7 @@ function getData(type, query) {
           label: link.label
         });
 
-      });
+      }
       update();
     }
 
@@ -192,6 +194,7 @@ function update() {
       .attr("xlink:href", function(d, i) { return "#path" + i; })
       .attr("startOffset", "50%")
       .html(function(d) { return d.label; });
+  label.exit().remove();
 
   circle = circleG.selectAll("circle")
       .data(force.nodes(), function(d) { return d.uri;});
@@ -221,6 +224,4 @@ window.onhashchange = function() {
 
 if (location.hash) {
   parseHash(location.hash.substring(1));
-} else {
-  location.hash = "uri=test-source4/12";
 }
