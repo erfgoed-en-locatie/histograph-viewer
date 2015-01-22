@@ -73,11 +73,26 @@ function resize() {
   force.size([width, height]).resume();
 }
 
+function createNode(node) {
+  return {
+    uri: node.uri,
+    name: node.name,
+    geometry: node.geometry,
+    beginDate: node.beginDate,
+    endDate: node.endDate,
+    type: node.type,
+    x: width / 2,
+    y: height / 2,
+    outgoing: [],
+    incoming: []
+  };
+}
+
 function getData(type, query) {
   closeBox();
   var url = endpoint + "q?" + type + "=" + query;
   d3.json(url, function(json) {
-    if (json && json.nodes && Object.keys(json.nodes).length > 0 && json.links && Object.keys(json.links).length > 0) {
+    if (json && json.nodes && Object.keys(json.nodes).length > 0) {
 
       location.hash = type + "=" + query;
 
@@ -91,31 +106,8 @@ function getData(type, query) {
 
         var link = json.links[linkId];
 
-        var source = nodes[link.source] || (nodes[link.source] = {
-          uri: json.nodes[link.source].uri,
-          name: json.nodes[link.source].name,
-          geometry: json.nodes[link.source].geometry,
-          beginDate: json.nodes[link.source].beginDate,
-          endDate: json.nodes[link.source].endDate,
-          type: json.nodes[link.source].type,
-          x: width / 2,
-          y: height / 2,
-          outgoing: [],
-          incoming: []
-        });
-
-        var target = nodes[link.target] || (nodes[link.target] = {
-          uri: json.nodes[link.target].uri,
-          name: json.nodes[link.target].name,
-          geometry: json.nodes[link.target].geometry,
-          beginDate: json.nodes[link.target].beginDate,
-          endDate: json.nodes[link.target].endDate,
-          type: json.nodes[link.target].type,
-          x: width / 2,
-          y: height / 2,
-          outgoing: [],
-          incoming: []
-        });
+        var source = nodes[link.source] || (nodes[link.source] = createNode(json.nodes[link.source]));
+        var target = nodes[link.target] || (nodes[link.target] = createNode(json.nodes[link.target]));
 
         nodes[link.source].outgoing.push(target);
         nodes[link.target].incoming.push(source);
@@ -127,6 +119,13 @@ function getData(type, query) {
         });
 
       }
+
+      for (var nodeId in json.nodes) {
+        if (!(nodeId in nodes)) {
+          nodes[nodeId] = createNode(json.nodes[nodeId]);
+        }
+      }
+
       update();
     }
 
