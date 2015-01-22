@@ -8,6 +8,24 @@ var width = window.innerWidth,
 
 var circleRadius = 6;
 
+
+// ================================================================================
+// Leaflet map initialization
+// ================================================================================
+
+var map = L.map('map'),
+    tileUrl = "http://otile2.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png",
+    pointStyle = {},
+    tileLayer = new L.TileLayer(tileUrl, {
+      minZoom: 4, maxZoom: 13,
+      opacity: 1
+    }).addTo(map),
+    geojsonLayer = new L.geoJson(null, {
+      pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, pointStyle);
+      }
+    }).addTo(map);
+
 var resizeTimer;
 var nodes = {},
     links = {};
@@ -87,10 +105,10 @@ function getData(type, query) {
         var target = nodes[link.target] || (nodes[link.target] = {
           uri: json.nodes[link.target].uri,
           name: json.nodes[link.target].name,
-          geometry: json.nodes[link.source].geometry,
-          beginDate: json.nodes[link.source].beginDate,
-          endDate: json.nodes[link.source].endDate,
-          type: json.nodes[link.source].type,
+          geometry: json.nodes[link.target].geometry,
+          beginDate: json.nodes[link.target].beginDate,
+          endDate: json.nodes[link.target].endDate,
+          type: json.nodes[link.target].type,
           x: width / 2,
           y: height / 2,
           outgoing: [],
@@ -113,8 +131,27 @@ function getData(type, query) {
   });
 }
 
+function closeBox() {
+  d3.select("#info-box").classed("hidden", true);
+}
+
 function vertexClick(d) {
-  console.log(d);
+  d3.select("#info-box").classed("hidden", false);
+
+  d3.select("#info-pit-name").html(d.name);
+  d3.select("#info-pit-uri").attr("href", "#uri=" + d.uri).html(d.uri);
+  d3.select("#info-pit-type").html(d.type);
+  d3.select("#info-pit-start-date").html(d.startDate);
+  d3.select("#info-pit-end-date").html(d.endDate);
+
+  if (d.geometry && d.geometry.type) {
+    d3.select("#info-box #map").classed("hidden", false);
+    geojsonLayer.clearLayers()
+    geojsonLayer.addData(d.geometry);
+    map.fitBounds(geojsonLayer.getBounds());
+  } else {
+    d3.select("#info-box #map").classed("hidden", true);
+  }
 }
 
 function parseHash(hash) {
@@ -228,3 +265,5 @@ window.onhashchange = function() {
 if (location.hash) {
   parseHash(location.hash.substring(1));
 }
+
+d3.select("#info-box-close").on("click", closeBox);

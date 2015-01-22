@@ -8,7 +8,9 @@
 	<link rel="stylesheet" href="css/normalize.css">
 	<link rel="stylesheet" href="css/skeleton.css">
 	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/leaflet.css">
   <script src="js/d3.v3.min.js" charset="utf-8"></script>
+  <script src="js/leaflet.js" charset="utf-8"></script>
 </head>
 <body>
   <div class="container">
@@ -21,6 +23,23 @@
         <label for="name-input">Search by name:</label>
         <input class="u-full-width" type="text" placeholder="Name" id="name-input">
       </div>
+    </div>
+  </div>
+  <div id="info-box" class="hidden drop-shadow">
+    <h5 id="info-pit-name"></h5>
+    <a href="#" id="info-box-close">close</a>
+    <table class="u-full-width">
+      <tr>
+        <td colspan="2">
+          <code id="info-pit-type"></code>:<code><a href="#" id="info-pit-uri"></a></code>
+        </td>
+      </tr>
+      <tr>
+        <td>Period:</td>
+        <td><span id="info-pit-start-date"></span> - <span id="info-pit-end-date"></span></td>
+      </tr>
+    </table>
+    <div id="map">
     </div>
   </div>
   <svg id="graph">
