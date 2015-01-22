@@ -73,6 +73,7 @@ function resize() {
 }
 
 function getData(type, query) {
+  closeBox();
   var url = endpoint + "q?" + type + "=" + query;
   d3.json(url, function(json) {
     if (json && json.nodes && Object.keys(json.nodes).length > 0 && json.links && Object.keys(json.links).length > 0) {
