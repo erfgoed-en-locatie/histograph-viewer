@@ -5,3 +5,8 @@ Expects [Histograph](https://github.com/erfgoed-en-locatie/histograph) to run on
 Start `histograph-viewer` with:
 
     python -m SimpleHTTPServer
+
+Examples:
+
+- http://localhost:8000/#uri=militieregisters/747
+- http://localhost:8000/#name=.*vissen.*

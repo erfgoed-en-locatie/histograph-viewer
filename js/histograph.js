@@ -1,7 +1,7 @@
 // Examples:
 //  Static: http://bl.ocks.org/mbostock/1667139
 
-var histograph = "http://localhost:3000/";
+var endpoint = "http://localhost:3000/";
 
 var width = window.innerWidth,
     height = window.innerHeight;
@@ -36,7 +36,7 @@ d3.select(window).on("resize", function() {
   resizeTimer = setInterval(resize, 20);
 });
 
-d3.select("#name-input, #uri-input").on('keyup', function() {
+d3.selectAll("#name-input, #uri-input").on('keyup', function() {
   if(d3.event.keyCode == 13){
     var value = d3.select(this).property('value').trim();
     var id = d3.select(this).attr('id');
@@ -55,11 +55,11 @@ function resize() {
 }
 
 function getData(type, query) {
-
-  d3.json(histograph + query, function(json) {
+  var url = endpoint + "q?" + type + "=" + query;
+  d3.json(url, function(json) {
     if (json && json.nodes && Object.keys(json.nodes).length > 0 && json.links && Object.keys(json.links).length > 0) {
 
-      location.hash = "uri=" + query;
+      location.hash = type + "=" + query;
 
       nodes = {};
       links = {};
@@ -74,6 +74,10 @@ function getData(type, query) {
         var source = nodes[link.source] || (nodes[link.source] = {
           uri: json.nodes[link.source].uri,
           name: json.nodes[link.source].name,
+          geometry: json.nodes[link.source].geometry,
+          beginDate: json.nodes[link.source].beginDate,
+          endDate: json.nodes[link.source].endDate,
+          type: json.nodes[link.source].type,
           x: width / 2,
           y: height / 2,
           outgoing: [],
@@ -83,6 +87,10 @@ function getData(type, query) {
         var target = nodes[link.target] || (nodes[link.target] = {
           uri: json.nodes[link.target].uri,
           name: json.nodes[link.target].name,
+          geometry: json.nodes[link.source].geometry,
+          beginDate: json.nodes[link.source].beginDate,
+          endDate: json.nodes[link.source].endDate,
+          type: json.nodes[link.source].type,
           x: width / 2,
           y: height / 2,
           outgoing: [],
@@ -105,22 +113,13 @@ function getData(type, query) {
   });
 }
 
-function minusCircleRadiusX(source, target) {
-  var l = Math.sqrt(Math.pow(target.x - source.x, 2) + Math.pow(target.y - source.y, 2)),
-      c = (l - circleRadius * 2) / l;
-  return (target.x - source.x) * c + source.x;
-}
-
-function minusCircleRadiusY(source, target) {
-  var l = Math.sqrt(Math.pow(target.x - source.x, 2) + Math.pow(target.y - source.y, 2)),
-      c = (l - circleRadius * 2) / l;
-  return (target.y - source.y) * c + source.y;
+function vertexClick(d) {
+  console.log(d);
 }
 
 function parseHash(hash) {
   params = {};
   hash.split("&").forEach(function(param) {
-    console.log(param)
     if (param.indexOf("=") > -1) {
       var kv = param.split("=");
       params[kv[0]] = kv[1];
@@ -131,7 +130,7 @@ function parseHash(hash) {
     d3.select("#uri-input").property('value', params.uri);
     getData('uri', params.uri);
   } else if (params.name) {
-    d3.select("#uri-input").property('value', params.name);
+    d3.select("#name-input").property('value', params.name);
     getData('name', params.name);
   }
 }
@@ -202,7 +201,11 @@ function update() {
   circle.enter().append("circle")
       .attr("transform", transform)
       .attr("r", circleRadius)
-      .on("click", onclick)
+      .attr("class", "pit")
+      .classed("has-geometry", function(d) {
+        return d.geometry && d.geometry.type;
+      })
+      .on("click", vertexClick)
       .call(force.drag);
   circle.exit().remove();
 

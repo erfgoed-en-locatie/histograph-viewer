@@ -111,10 +111,14 @@ marker {
   stroke-dasharray: 0,2 1;
 }
 
-circle {
+.pit {
   fill: #ffe611;
   stroke: #333;
   stroke-width: 1.5px;
+}
+
+.pit.has-geometry {
+  fill: #0036fa;
 }
 
 text {
