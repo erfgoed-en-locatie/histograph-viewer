@@ -97,8 +97,8 @@ body {
   border-radius: 4px;
   box-sizing: border-box;
 
-  height: 300px;
-  width: 350px;
+  height: 350px;
+  width: 400px;
   bottom: 20px;
   right: 20px;
 
@@ -149,9 +149,10 @@ body {
   fill: none;
   stroke: #aaa;
   stroke-width: 1.5px;
+  marker-end: url(#marker-arrow);
 }
 
-marker {
+#marker-arrow path {
   fill: #aaa;
 }
 

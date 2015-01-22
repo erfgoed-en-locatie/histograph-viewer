@@ -17,7 +17,7 @@ var map = L.map('map'),
     tileUrl = "http://otile2.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png",
     pointStyle = {},
     tileLayer = new L.TileLayer(tileUrl, {
-      minZoom: 4, maxZoom: 13,
+      minZoom: 4, maxZoom: 18,
       opacity: 1
     }).addTo(map),
     geojsonLayer = new L.geoJson(null, {
@@ -25,6 +25,7 @@ var map = L.map('map'),
         return L.circleMarker(latlng, pointStyle);
       }
     }).addTo(map);
+map.setZoom(12);
 
 var resizeTimer;
 var nodes = {},
@@ -149,7 +150,7 @@ function vertexClick(d) {
     d3.select("#info-box #map").classed("hidden", false);
     geojsonLayer.clearLayers()
     geojsonLayer.addData(d.geometry);
-    map.fitBounds(geojsonLayer.getBounds());
+    map.panTo(geojsonLayer.getBounds().getCenter());
   } else {
     d3.select("#info-box #map").classed("hidden", true);
   }
@@ -214,8 +215,7 @@ function update() {
         return "M" + d.source.x + "," + d.source.y + " "
             + "L" + d.target.x + "," + d.target.y;
       })
-      .attr("id", function(d, i) { return "path" + i; })
-      .style("marker-end", "url(#markerArrow");
+      .attr("id", function(d, i) { return "path" + i; });
   link.exit().remove();
 
   label = labelG.selectAll("text")
