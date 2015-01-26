@@ -8,14 +8,8 @@ Start `histograph-viewer` with:
 
 Examples:
 
-- http://localhost:8000/#uri=militieregisters/747
-- http://localhost:8000/#name=.*vissen.*
-- http://localhost:8000/#uri=gemeentegeschiedenis/103
-- http://localhost:8000/#name=traiectu.
-- http://localhost:8000/#name=monster
-
-- http://www.erfgeo.nl/hg/#uri=militieregisters/747
-- http://www.erfgeo.nl/hg/#name=.*vissen.*
-- http://www.erfgeo.nl/hg/#uri=gemeentegeschiedenis/103
-- http://www.erfgeo.nl/hg/#name=traiectu.
-- http://www.erfgeo.nl/hg/#name=monster
+- URI `militieregisters/747`: [localhost](http://localhost:8000/#uri=militieregisters/747), [erfgeo.nl](http://www.erfgeo.nl/hg/#uri=militieregisters/747)
+- Name contains _"vissen"_: [localhost](http://localhost:8000/#name=.*vissen.*), [erfgeo.nl](http://www.erfgeo.nl/hg/#name=.*vissen.*)
+- Municipality of Amsterdam: [localhost](http://localhost:8000/#uri=gemeentegeschiedenis/103), [erfgeo.nl](http://www.erfgeo.nl/hg/#uri=gemeentegeschiedenis/103)
+- Roman towns: [localhost](http://localhost:8000/#name=traiectu.), [erfgeo.nl](http://www.erfgeo.nl/hg/#name=traiectu.)
+- Town of Monster: [localhost](http://localhost:8000/#name=monster), [erfgeo.nl](http://www.erfgeo.nl/hg/#name=monster)
