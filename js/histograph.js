@@ -78,7 +78,7 @@ function createNode(node) {
     uri: node.uri,
     name: node.name,
     geometry: node.geometry,
-    beginDate: node.beginDate,
+    startDate: node.startDate,
     endDate: node.endDate,
     type: node.type,
     x: width / 2,
