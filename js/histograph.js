@@ -8,7 +8,6 @@ var width = window.innerWidth,
 
 var circleRadius = 6;
 
-
 // ================================================================================
 // Leaflet map initialization
 // ================================================================================
@@ -25,7 +24,7 @@ var map = L.map('map'),
         return L.circleMarker(latlng, pointStyle);
       }
     }).addTo(map);
-map.setZoom(12);
+map.setView([52.2808, 5.4918], 9);
 
 var resizeTimer;
 var nodes = {},
@@ -53,6 +52,10 @@ var linkG = svg.append("g"),
 d3.select(window).on("resize", function() {
   clearInterval(resizeTimer);
   resizeTimer = setInterval(resize, 20);
+});
+
+d3.selectAll("#tabs a").on('click', function() {
+
 });
 
 d3.selectAll("#name-input, #uri-input").on('keyup', function() {
@@ -90,43 +93,49 @@ function createNode(node) {
 
 function getData(type, query) {
   closeBox();
-  var url = endpoint + "q?" + type + "=" + query;
+  var url = endpoint + "search?" + type + "=" + query;
   d3.json(url, function(json) {
-    if (json && json.nodes && Object.keys(json.nodes).length > 0) {
+    if (json && json.features && json.features.length > 0) {
 
       location.hash = type + "=" + query;
 
-      nodes = {};
-      links = {};
+      geojsonLayer.clearLayers();
 
-      width = window.innerWidth, height = window.innerHeight;
+      geojsonLayer.addData(json);
+      map.fitBounds(geojsonLayer.getBounds());
 
-      // Compute the distinct nodes from the links.
-      for (var linkId in json.links) {
-
-        var link = json.links[linkId];
-
-        var source = nodes[link.source] || (nodes[link.source] = createNode(json.nodes[link.source]));
-        var target = nodes[link.target] || (nodes[link.target] = createNode(json.nodes[link.target]));
-
-        nodes[link.source].outgoing.push(target);
-        nodes[link.target].incoming.push(source);
-
-        links[source.uri + "-" + target.uri] || (links[source.uri + "-" + target.uri] = {
-          source: source,
-          target: target,
-          label: link.label
-        });
-
-      }
-
-      for (var nodeId in json.nodes) {
-        if (!(nodeId in nodes)) {
-          nodes[nodeId] = createNode(json.nodes[nodeId]);
-        }
-      }
-
-      update();
+    //
+    //   nodes = {};
+    //   links = {};
+    //
+    //   width = window.innerWidth, height = window.innerHeight;
+    //
+    //   // Compute the distinct nodes from the links.
+    //   for (var linkId in json.links) {
+    //
+    //     var link = json.links[linkId];
+    //
+    //     var source = nodes[link.source] || (nodes[link.source] = createNode(json.nodes[link.source]));
+    //     var target = nodes[link.target] || (nodes[link.target] = createNode(json.nodes[link.target]));
+    //
+    //     nodes[link.source].outgoing.push(target);
+    //     nodes[link.target].incoming.push(source);
+    //
+    //     links[source.uri + "-" + target.uri] || (links[source.uri + "-" + target.uri] = {
+    //       source: source,
+    //       target: target,
+    //       label: link.label
+    //     });
+    //
+    //   }
+    //
+    //   for (var nodeId in json.nodes) {
+    //     if (!(nodeId in nodes)) {
+    //       nodes[nodeId] = createNode(json.nodes[nodeId]);
+    //     }
+    //   }
+    //
+    //   update();
     }
 
   });

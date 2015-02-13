@@ -11,21 +11,45 @@
 	<link rel="stylesheet" href="css/leaflet.css">
   <script src="js/d3.v3.min.js" charset="utf-8"></script>
   <script src="js/leaflet.js" charset="utf-8"></script>
+  <script src="js/turf.min.js" charset="utf-8"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="row">
-      <div class="six columns">
+  <div id="sidebar">
+    <div id="sidebar-container">
+      <img src="images/histograph.svg" width="200px" />
+      <h1>Histograph</h1>
+
+      <div class="">
         <label for="uri-input">Search by URI:</label>
         <input class="u-full-width" type="text" placeholder="URI" id="uri-input">
       </div>
-      <div class="six columns">
+      <div class="">
         <label for="name-input">Search by name:</label>
         <input class="u-full-width" type="text" placeholder="Name" id="name-input">
       </div>
     </div>
   </div>
-  <div id="info-box" class="hidden drop-shadow">
+  <div id="viewer">
+    <div id="tabs">
+      <a href="#">Map</a> |
+      <a href="#">Graph</a>
+    </div>
+    <div id="graph" class="hidden">
+      <svg>
+        <defs>
+          <marker id='marker-arrow' orient='auto' markerWidth='8' markerHeight='8'
+                  refX='12' refY='4'>
+            <path d='M0,0 V8 L8,4 Z' />
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <div id="map">
+    </div>
+  </div>
+
+
+  <!-- <div id="info-box" class="hidden drop-shadow">
     <h5 id="info-pit-name"></h5>
     <a href="#" id="info-box-close">close</a>
     <table class="u-full-width">
@@ -41,15 +65,8 @@
     </table>
     <div id="map">
     </div>
-  </div>
-  <svg id="graph">
-    <defs>
-      <marker id='marker-arrow' orient='auto' markerWidth='8' markerHeight='8'
-              refX='12' refY='4'>
-        <path d='M0,0 V8 L8,4 Z' />
-      </marker>
-    </defs>
-  </svg>
+  </div> -->
+
   <script src="js/histograph.js" charset="utf-8"></script>
 </body>
 </html>
