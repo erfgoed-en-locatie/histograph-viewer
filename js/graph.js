@@ -1,30 +1,16 @@
-// Examples:
-//  Static: http://bl.ocks.org/mbostock/1667139
+// Old D3.js graph code
+// TODO: use this code in viewer!
 
-var endpoint = "http://localhost:3000/";
-
-var width = window.innerWidth,
-    height = window.innerHeight;
-
-var circleRadius = 6;
-
-// ================================================================================
-// Leaflet map initialization
-// ================================================================================
-
-var map = L.map('map'),
-    tileUrl = "http://otile2.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png",
-    pointStyle = {},
-    tileLayer = new L.TileLayer(tileUrl, {
-      minZoom: 4, maxZoom: 18,
-      opacity: 1
-    }).addTo(map),
-    geojsonLayer = new L.geoJson(null, {
-      pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, pointStyle);
-      }
-    }).addTo(map);
-map.setView([52.2808, 5.4918], 9);
+// <div id="graph" class="hidden">
+//   <svg>
+//     <defs>
+//       <marker id='marker-arrow' orient='auto' markerWidth='8' markerHeight='8'
+//               refX='12' refY='4'>
+//         <path d='M0,0 V8 L8,4 Z' />
+//       </marker>
+//     </defs>
+//   </svg>
+// </div>
 
 var resizeTimer;
 var nodes = {},
@@ -42,7 +28,7 @@ var force = d3.layout.force()
     .on("tick", tick)
     .size([width, height]);
 
-var svg = d3.select("#graph");
+var svg = d3.select("#graph > svg");
 
 var linkG = svg.append("g"),
     circleG = svg.append("g"),
@@ -54,21 +40,8 @@ d3.select(window).on("resize", function() {
   resizeTimer = setInterval(resize, 20);
 });
 
-d3.selectAll("#tabs a").on('click', function() {
 
-});
 
-d3.selectAll("#name-input, #uri-input").on('keyup', function() {
-  if(d3.event.keyCode == 13){
-    var value = d3.select(this).property('value').trim();
-    var id = d3.select(this).attr('id');
-    if (id === "uri-input") {
-      getData('uri', value);
-    } else if (id === "name-input") {
-      getData('name', value);
-    }
-  }
-});
 
 function resize() {
   width = window.innerWidth, height = window.innerHeight;
@@ -91,59 +64,41 @@ function createNode(node) {
   };
 }
 
-function getData(type, query) {
-  closeBox();
-  var url = endpoint + "search?" + type + "=" + query;
-  d3.json(url, function(json) {
-    if (json && json.features && json.features.length > 0) {
 
-      location.hash = type + "=" + query;
+//
+//   nodes = {};
+//   links = {};
+//
+//   width = window.innerWidth, height = window.innerHeight;
+//
+//   // Compute the distinct nodes from the links.
+//   for (var linkId in json.links) {
+//
+//     var link = json.links[linkId];
+//
+//     var source = nodes[link.source] || (nodes[link.source] = createNode(json.nodes[link.source]));
+//     var target = nodes[link.target] || (nodes[link.target] = createNode(json.nodes[link.target]));
+//
+//     nodes[link.source].outgoing.push(target);
+//     nodes[link.target].incoming.push(source);
+//
+//     links[source.uri + "-" + target.uri] || (links[source.uri + "-" + target.uri] = {
+//       source: source,
+//       target: target,
+//       label: link.label
+//     });
+//
+//   }
+//
+//   for (var nodeId in json.nodes) {
+//     if (!(nodeId in nodes)) {
+//       nodes[nodeId] = createNode(json.nodes[nodeId]);
+//     }
+//   }
+//
+//   update();
 
-      geojsonLayer.clearLayers();
 
-      geojsonLayer.addData(json);
-      map.fitBounds(geojsonLayer.getBounds());
-
-    //
-    //   nodes = {};
-    //   links = {};
-    //
-    //   width = window.innerWidth, height = window.innerHeight;
-    //
-    //   // Compute the distinct nodes from the links.
-    //   for (var linkId in json.links) {
-    //
-    //     var link = json.links[linkId];
-    //
-    //     var source = nodes[link.source] || (nodes[link.source] = createNode(json.nodes[link.source]));
-    //     var target = nodes[link.target] || (nodes[link.target] = createNode(json.nodes[link.target]));
-    //
-    //     nodes[link.source].outgoing.push(target);
-    //     nodes[link.target].incoming.push(source);
-    //
-    //     links[source.uri + "-" + target.uri] || (links[source.uri + "-" + target.uri] = {
-    //       source: source,
-    //       target: target,
-    //       label: link.label
-    //     });
-    //
-    //   }
-    //
-    //   for (var nodeId in json.nodes) {
-    //     if (!(nodeId in nodes)) {
-    //       nodes[nodeId] = createNode(json.nodes[nodeId]);
-    //     }
-    //   }
-    //
-    //   update();
-    }
-
-  });
-}
-
-function closeBox() {
-  d3.select("#info-box").classed("hidden", true);
-}
 
 function vertexClick(d) {
   d3.select("#info-box").classed("hidden", false);
@@ -161,24 +116,6 @@ function vertexClick(d) {
     map.panTo(geojsonLayer.getBounds().getCenter());
   } else {
     d3.select("#info-box #map").classed("hidden", true);
-  }
-}
-
-function parseHash(hash) {
-  params = {};
-  hash.split("&").forEach(function(param) {
-    if (param.indexOf("=") > -1) {
-      var kv = param.split("=");
-      params[kv[0]] = kv[1];
-    }
-  });
-
-  if (params.uri) {
-    d3.select("#uri-input").property('value', params.uri);
-    getData('uri', params.uri);
-  } else if (params.name) {
-    d3.select("#name-input").property('value', params.name);
-    getData('name', params.name);
   }
 }
 
@@ -266,13 +203,3 @@ function update() {
 
   force.start();
 }
-
-window.onhashchange = function() {
-  parseHash(location.hash.substring(1))
-};
-
-if (location.hash) {
-  parseHash(location.hash.substring(1));
-}
-
-d3.select("#info-box-close").on("click", closeBox);
