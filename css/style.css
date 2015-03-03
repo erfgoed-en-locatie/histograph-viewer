@@ -159,6 +159,13 @@ input[type="search"]:focus {
   float: right;
 }
 
+.concept-alt-name {
+  font-style: italic;
+}
+
+.concept-alt-name:before { content: open-quote; }
+.concept-alt-name:after  { content: close-quote; }
+
 ol#concepts {
   list-style-type: none;
 }
