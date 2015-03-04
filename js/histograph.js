@@ -138,7 +138,7 @@ function createConcept(d, i) {
 
   var layers = d.properties.pits
     //.filter(function(pit) { return pit.geometryIndex >= 0; })
-    .map(function(pit) { return pit.layer; })
+    .map(function(pit) { return pit.source; })
     .unique();
 
   li.append("ul")
