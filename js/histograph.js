@@ -123,7 +123,6 @@ function createConcept(d, i) {
   header.append("span").html(name);
   header.append("code").html(d.properties.type.replace("hg:", ""));
 
-
   if (names.length > 1) {
     var namesHtml = names
           .map(function(name) { return '<span class="concept-alt-name">' + name + '</span>'; })
@@ -136,15 +135,15 @@ function createConcept(d, i) {
         .html(namesHtml + namesSuffix);
   }
 
-  var layers = d.properties.pits
+  var sources = d.properties.pits
     //.filter(function(pit) { return pit.geometryIndex >= 0; })
     .map(function(pit) { return pit.source; })
     .unique();
 
   li.append("ul")
-      .attr("class", "layer-list")
+      .attr("class", "source-list")
       .selectAll("li")
-      .data(layers)
+      .data(sources)
       .enter()
     .append("li")
     .append("a")

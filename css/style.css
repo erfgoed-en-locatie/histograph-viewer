@@ -179,12 +179,12 @@ ol#concepts h5 {
   cursor: pointer;
 }
 
-.layer-list {
+.source-list {
   list-style-type: none;
   margin: 0;
 }
 
-.layer-list li {
+.source-list li {
   display: inline-block;
 }
 
