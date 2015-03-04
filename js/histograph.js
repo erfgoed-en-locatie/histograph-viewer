@@ -1,14 +1,12 @@
 // Examples:
 //  Static: http://bl.ocks.org/mbostock/1667139
 
-var endpoint = "http://localhost:3000/";
+var endpoint = "http://api.histograph.io/";
 
 var width = window.innerWidth,
     height = window.innerHeight;
 
 var circleRadius = 6;
-
-
 
 Array.prototype.unique = function() {
 	var n = {},
