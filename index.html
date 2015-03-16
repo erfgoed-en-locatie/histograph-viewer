@@ -12,34 +12,26 @@
 	<link rel="stylesheet" href="css/leaflet.css">
   <script src="js/d3.v3.min.js" charset="utf-8"></script>
   <script src="js/leaflet.js" charset="utf-8"></script>
+  <script src="js/react.js"></script>
+  <script src="js/JSXTransformer.js"></script>
 </head>
 <body>
-  <div id="sidebar">
-    <div class="sidebar-box-padding">
+  <div id="sidebar-container" class="box-container">
+    <div class="box-container-padding">
 
       <div id="search-box" class="box padding">
         <a href="#"><img src="images/histograph.svg" /></a>
         <input type="search" placeholder="Search by name, Histograph ID, or URI" id="search-input">
       </div>
 
-      <div id="concepts-box" class="box hidden">
-        <div id="concepts-header" class="padding">
-          <span id="concepts-count">27</span> <span id="concepts-concepts"></span> found:
-          <a id="concepts-close" href="#">Close</a>
-        </div>
-        <ol id="concepts">
-        </ol>
-      </div>
-
-      <div id="pits-box" class="box hidden">
-        <ol id="pits">
-        </ol>
+      <div id="concepts-box" class="box list-box">
       </div>
 
     </div>
   </div>
   <div id="map">
   </div>
-  <script src="js/histograph.js" charset="utf-8"></script>
+  <script src="js/map.js" charset="utf-8"></script>
+  <script type="text/jsx" src="histograph.jsx"></script>
 </body>
 </html>

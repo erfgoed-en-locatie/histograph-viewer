@@ -1,7 +1,8 @@
-// Examples:
-//  Static: http://bl.ocks.org/mbostock/1667139
+---
+---
 
-var endpoint = "http://api.histograph.io/";
+var geojson,
+    endpoint = "http://{{ site.data.api.host }}/";
 
 var width = window.innerWidth,
     height = window.innerHeight;
@@ -27,23 +28,28 @@ Array.prototype.unique = function() {
 var map = L.map('map', {
       //zoomControl: false
     }),
-    color = '#4abb84',
+    color = 'rgba({{ site.data.style.color }}, 1)',
     tileUrl = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
   	attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-  	subdomains = 'abcd',
+  	disableHashChange = false,
+    subdomains = 'abcd',
     pointStyle = {},
     lineStyle = {
       color: color,
       weight: 3,
       opacity: 0.65
     },
-    tileLayer = new L.TileLayer(tileUrl, {
+    tileLayer = L.tileLayer(tileUrl, {
       subdomains: subdomains,
       attribution: attribution,
       minZoom: 4, maxZoom: 18,
       opacity: 1
     }).addTo(map),
-    geojsonLayers = [];
+    geojsonLayers = L.featureGroup().addTo(map),
+    geojsonLayerIds = [],
+    geometryTypeOrder = [
+      "Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"
+    ];
 
 map.zoomControl.setPosition('topright');
 map.setView([52.2808, 5.4918], 9);
@@ -62,12 +68,96 @@ d3.selectAll("#search-input").on('keyup', function() {
   }
 });
 
+
+d3.select("#show-graph")
+    .on("click", function() {
+      d3.select("#graph-container").classed("hidden", false);
+
+      // // calling textBlock() returns the function object textBlock().my
+      // // via which we set the "label" property of the textBlock outer func
+      // var tb = d3.textBlock().label(function(d) {return d.label;});
+      // // now we apply the returned function object my == tb on an enter selection
+      // var item = svg.selectAll("rect")
+      //     .data(items)
+      //   .enter()
+      //     .append("svg:g")
+      //     .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+      //     .call(tb);
+
+    });
+
 d3.select("#concepts-close")
     .on("click", function() {
       d3.select("#concepts-box").classed("hidden", true);
     });
 
-function createConcept(d, i) {
+d3.select("#pits-close")
+    .on("click", function() {
+      d3.select("#pits-box").classed("hidden", true);
+      d3.select("#concepts-box").classed("hidden", false);
+    });
+
+
+function createPitList(conceptIndex) {
+  d3.select("#pits").selectAll("li.pit").remove();
+
+  var concept = d3.select("#concepts .concept:nth-child(" + (conceptIndex + 1) + ")").datum();
+
+  if (concept && concept.properties.pits && concept.properties.pits.length > 0) {
+
+    d3.select("#pits-count").html(concept.properties.pits.length);
+    d3.select("#relations-count").html(concept.properties.relations.length);
+
+    d3.select("#pits").selectAll("li.pit")
+        .data(concept.properties.pits)
+        .enter()
+      .append("li")
+        .attr("class", "padding pit")
+        .each(createPitListItem(concept));
+
+    //d3.select("#concepts-count").html(geojson.features.length);
+    //d3.select("#concepts-concepts").html(geojson.features.length == 1 ? "concept" : "concepts");
+    d3.select("#pits-box").classed("hidden", false);
+  } else {
+    // TODO: refactor, create function
+    d3.select("#pits-box").classed("hidden", true);
+  }
+}
+
+function createPitListItem(concept, d, pitIndex) {
+  return function (d, pitIndex) {
+    var li = d3.select(this);
+
+    li.append("h6").attr("class", "concept-alt-name").html(d.name);
+
+    li.append("div").append("code").html(d.source);
+    li.append("div").append("code").html(d.hgid);
+    li.append("div").html(d.uri);
+
+    var dateString;
+    if (d.startDate && d.endDate) {
+      dateString = d.startDate + " - " + d.endDate;
+    } else if (d.startDate) {
+      dateString = "From " + d.startDate;
+    } else if (d.endDate) {
+      dateString = "Until " + d.endDate;
+    }
+
+    if (dateString) {
+      li.append("div").html(dateString);
+    }
+
+
+    if (d.geometryIndex >= 0) {
+      li.append("div").html(concept.geometry.geometries[d.geometryIndex].type);
+    }
+
+    //li.append("div").html(d.uri);
+    // geometry.type
+  }
+}
+
+function createConceptListItem(d, conceptIndex) {
   var names = d.properties.pits.map(function(pit) { return pit.name; });
 
   var counts = { };
@@ -95,33 +185,35 @@ function createConcept(d, i) {
 
   var li = d3.select(this);
 
-  li.append("img")
-      .attr("class", "concept-zoom-in")
-      .attr("src", "images/zoom-in.svg")
-      .on("click", function() {
-        map.fitBounds(geojsonLayers[i].getBounds());
-      });
+  // li.append("img")
+  //     .attr("class", "concept-zoom-in")
+  //     .attr("src", "images/zoom-in.svg")
+  //     .on("click", function() {
+  //       map.fitBounds(geojsonLayers[conceptIndex].getBounds());
+  //     });
 
   var header = li.append("h5")
-      .on("click", function() {
-        d3.selectAll("ol#concepts li").classed("selected", false);
-        d3.select(this.parentNode).classed("selected", true);
-
-        geojsonLayers.forEach(function(geojsonLayer, i) {
-          geojsonLayers[i].eachLayer(function (layer) {
-            layer.setStyle({color: color});
-          });
-
-        });
-
-        geojsonLayers[i].eachLayer(function (layer) {
-          layer.setStyle({color :'red'});
-        });
-
-      })
+      // .on("click", function() {
+      //   d3.selectAll("ol#concepts li").classed("selected", false);
+      //   d3.select(this.parentNode).classed("selected", true);
+      //
+      //   geojsonLayers.forEach(function(geojsonLayer, layerIndex) {
+      //     geojsonLayers[layerIndex].eachLayer(function (layer) {
+      //       layer.setStyle({color: color});
+      //     });
+      //
+      //   });
+      //
+      //   geojsonLayers[conceptIndex].eachLayer(function (layer) {
+      //     layer.setStyle({color :'red'});
+      //   });
+      //
+      // })
 
   header.append("span").html(name);
   header.append("code").html(d.properties.type.replace("hg:", ""));
+
+  li.append("div").html("Reason found:")
 
   if (names.length > 1) {
     var namesHtml = names
@@ -132,7 +224,7 @@ function createConcept(d, i) {
         namesSuffix = sorted.length > names.length ? " and " + namesLengthDiff + " other " +  namesPlurSing: "";
 
     li.append("div")
-        .html(namesHtml + namesSuffix);
+        .html("Names: " + namesHtml + namesSuffix);
   }
 
   var sources = d.properties.pits
@@ -154,18 +246,78 @@ function createConcept(d, i) {
     .append("code")
       .html(function(d) { return d; });
 
+  var buttons = li.append("div").attr("class", "buttons");
+  buttons.append("button")
+      .attr("class", "select")
+      .html("Select")
+      .on("click", function() {
+        createPitList(conceptIndex);
+        d3.select("#concepts-box").classed("hidden", true);
+        map.fitBounds(geojsonLayers.getLayer(geojsonLayerIds[conceptIndex]).getBounds());
+      });
+
+  buttons.append("button")
+      .attr("class", "zoom")
+      .html("Show")
+      .on("click", function() {
+        selectConcept(conceptIndex);
+      });
+
+
+//   var dates = d.properties.pits
+//     .filter(function(pit) { return pit.geometryIndex > -1 && (pit.startDate || pit.endDate); })
+//     .map(function(pit) { return [pit.startDate, pit.endDate]; })
+//     .reduce(function(a, b) {
+//       return a.concat(b);
+//     })
+//     .filter(function(date) { return date; })
+//     .sort(function(a, b) {
+//       return new Date(b.date) - new Date(a.date);
+//     });
+// console.log(dates)
+
 
   var geojsonLayer = new L.geoJson(null, {
     style: lineStyle,
     pointToLayer: function (feature, latlng) {
       return L.circleMarker(latlng, pointStyle);
+    },
+    onEachFeature: function(feature, layer) {
+      layer.on('click', function (e) {
+        var properties = e.target.feature.properties;
+        selectConcept(properties.conceptIndex, properties.pitIndex);
+      });
     }
   }).addTo(map);
 
-  geojsonLayers.push(geojsonLayer);
+  geojsonLayers.addLayer(geojsonLayer);
+  geojsonLayerIds.push(geojsonLayers.getLayerId(geojsonLayer));
 
-  d.geometry.geometries.forEach(function(geometry) {
-    geojsonLayer.addData(geometry);
+  d.geometry.geometries.map(function(geometry, geometryIndex) {
+    var hgid,
+        pitIndex;
+    for (pitIndex = 0; pitIndex < d.properties.pits.length; pitIndex++) {
+      if (d.properties.pits[pitIndex].geometryIndex == geometryIndex) {
+        hgid = d.properties.pits[pitIndex].hgid;
+        break;
+      }
+    }
+
+    return {
+      type: "Feature",
+      properties: {
+        conceptIndex: conceptIndex,
+        geometryIndex: geometryIndex,
+        pitIndex: pitIndex,
+        hgid: hgid
+      },
+      geometry: geometry
+    };
+  }).sort(function(a, b) {
+    return geometryTypeOrder.indexOf(b.geometry.type) - geometryTypeOrder.indexOf(a.geometry.type);
+  })
+  .forEach(function(feature) {
+    geojsonLayer.addData(feature);
   });
 
   //
@@ -174,30 +326,46 @@ function createConcept(d, i) {
   // jaartallen
 }
 
-function getData(type, query) {
-  var url = endpoint + "search?" + type + "=" + query;
-  d3.json(url, function(json) {
-    if (json && json.features && json.features.length > 0) {
-
-      geojsonLayers.forEach(function(geojsonLayer) {
-        geojsonLayer.clearLayers();
+function selectConcept(conceptIndex, pitIndex) {
+  d3.selectAll("ol#concepts li.concept")
+      .classed("pb-pattern o-lines-light", function(d, i) {
+        return i == conceptIndex;
       });
-      geojsonLayers = [];
 
-      d3.select("#concepts").selectAll("li").remove();
+  map.fitBounds(geojsonLayers.getLayer(geojsonLayerIds[conceptIndex]).getBounds());
+}
 
-      d3.select("#concepts").selectAll("li")
-          .data(json.features)
-          .enter()
-        .append("li")
-          .attr("class", "padding")
-          .each(createConcept);
+function createConceptList(geojson) {
+  geojsonLayers.clearLayers();
+  geojsonLayerIds = [];
 
-      d3.select("#concepts-count").html(json.features.length);
-      d3.select("#concepts-concepts").html(json.features.length == 1 ? "concept" : "concepts");
-      d3.select("#concepts-box").classed("hidden", false);
-      location.hash = type + "=" + query;
-    }
+  d3.select("#concepts").selectAll("li.concept").remove();
+
+  if (geojson && geojson.features && geojson.features.length > 0) {
+    d3.select("#concepts").selectAll("li.concept")
+        .data(geojson.features)
+        .enter()
+      .append("li")
+        .attr("class", "padding concept")
+        .each(createConceptListItem);
+
+    d3.select("#concepts-count").html(geojson.features.length);
+    d3.select("#concepts-concepts").html(geojson.features.length == 1 ? "concept" : "concepts");
+    d3.select("#concepts-box").classed("hidden", false);
+  } else {
+    // TODO: refactor, create function
+    d3.select("#concepts-box").classed("hidden", true);
+  }
+}
+
+function getData(type, query) {
+  d3.select("#pits-box").classed("hidden", true);
+  var url = endpoint + "search?" + type + "=" + query;
+  d3.json(url, function(data) {
+    geojson = data;
+    createConceptList(geojson);
+    map.fitBounds(geojsonLayers.getBounds());
+    setHash(type + "=" + query);
   });
 }
 
@@ -222,8 +390,18 @@ function parseHash(hash) {
   }
 }
 
+function setHash(hash) {
+  disableHashChange = true;
+  location.hash = hash;
+  setTimeout(function(){
+    disableHashChange = false;
+  }, 1000);
+}
+
 window.onhashchange = function() {
-  parseHash(location.hash.substring(1))
+  if (!disableHashChange) {
+    parseHash(location.hash.substring(1))
+  }
 };
 
 if (location.hash) {

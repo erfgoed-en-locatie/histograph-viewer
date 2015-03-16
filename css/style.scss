@@ -1,0 +1,380 @@
+---
+---
+
+/* Variables
+   ========================================================================== */
+
+$primary-color: rgba({{ site.data.style.color }},1);
+$color-pattern: rgba({{ site.data.style.color }},0.4); //use rgba to not break the svg encoded string
+$sidebar-width: 450px;
+
+/* Fonts
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Bree Serif';
+  src: url("../fonts/BreeSerif-Regular.otf");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Light.ttf");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-LightItalic.ttf");
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Italic.ttf");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Semibold.ttf");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-SemiboldItalic.ttf");
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-Bold.ttf");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-BoldItalic.ttf");
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-ExtraBold.ttf");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("../fonts/OpenSans-ExtraBoldItalic.ttf");
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Consolas";
+  src: url("../fonts/Consolas.ttf");
+}
+
+/* Patternbolt patterns & styles (https://github.com/buseca/patternbolt)
+   ========================================================================== */
+
+$o-lines-bold: url("data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20id%3D%27Layer_1%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20xmlns%3Axlink%3D%27http%3A//www.w3.org/1999/xlink%27%20x%3D%270px%27%20y%3D%270px%27%0A%20%20%20%20%20fill%3D%27"+ $color-pattern +"%27%20width%3D%2712px%27%20height%3D%2712px%27%20viewBox%3D%270%200%2012%2012%27%20enable-background%3D%27new%200%200%2012%2012%27%20xml%3Aspace%3D%27preserve%27%3E%0A%3Cpath%20d%3D%27M12%2C3.535V0H8.465L0%2C8.465V12h3.535L12%2C3.535z%20M0%2C0h3.535L0%2C3.535V0z%20M8.465%2C12L12%2C8.465V12H8.465z%27/%3E%0A%3C/svg%3E");
+$o-lines-medium: url("data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20id%3D%27Layer_1%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20xmlns%3Axlink%3D%27http%3A//www.w3.org/1999/xlink%27%20x%3D%270px%27%20y%3D%270px%27%0A%20%20%20%20%20fill%3D%27"+ $color-pattern +"%27%20width%3D%2712px%27%20height%3D%2712px%27%20viewBox%3D%270%200%2012%2012%27%20enable-background%3D%27new%200%200%2012%2012%27%20xml%3Aspace%3D%27preserve%27%3E%0A%3Cpath%20d%3D%27M12%2C2.121V0H9.879L0%2C9.879V12h2.121L12%2C2.121z%20M9.879%2C12L12%2C9.879V12H9.879z%20M0%2C2.121V0h2.121L0%2C2.121z%27/%3E%0A%3C/svg%3E");
+$o-lines-light: url("data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20id%3D%27Layer_1%27%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20xmlns%3Axlink%3D%27http%3A//www.w3.org/1999/xlink%27%20x%3D%270px%27%20y%3D%270px%27%0A%20%20%20%20%20fill%3D%27"+ $color-pattern +"%27%20width%3D%2712px%27%20height%3D%2712px%27%20viewBox%3D%276.375%206.375%2012%2012%27%20enable-background%3D%27new%206.375%206.375%2012%2012%27%20xml%3Aspace%3D%27preserve%27%3E%0A%3Cpath%20d%3D%27M7.082%2C18.375H6.375v-0.707L17.668%2C6.375h0.707v0.707L7.082%2C18.375z%20M18.375%2C18.375v-0.707l-0.707%2C0.707H18.375z%0A%20%20%20%20%20M7.082%2C6.375H6.375v0.707L7.082%2C6.375z%27/%3E%0A%3C/svg%3E");
+
+.pb-pattern {
+  &:after {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+    content:'';
+    z-index: -1;
+  }
+}
+
+.pb-pattern {
+  position: relative;
+  z-index: 1;
+}
+
+.o-lines-bold {
+  &:after{
+    background-image: $o-lines-bold;
+  }
+}
+.o-lines-medium {
+  &:after {
+    background-image: $o-lines-medium;
+  }
+}
+.o-lines-light {
+  &:after {
+    background-image: $o-lines-light;
+  }
+}
+
+/* Style
+   ========================================================================== */
+
+body {
+  font-family: "Open Sans";
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Bree Serif";
+}
+
+.hidden {
+  display: none;
+}
+
+.box-container {
+  position: absolute;
+  z-index: 1;
+  height: 100%;
+  pointer-events: none;
+}
+
+.box-container-padding {
+  top: 10px;
+  left: 10px;
+  bottom: 10px;
+  right: 10px;
+  position: absolute;
+}
+
+.padding {
+  padding: 7px;
+}
+
+#map {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.box {
+  pointer-events: all;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+}
+
+#sidebar-container {
+  left: 0;
+  width: $sidebar-width;
+}
+
+#graph-container {
+  left: $sidebar-width;
+  right: 0;
+}
+
+#search-box {
+  margin-bottom: 10px;
+}
+
+#search-box img {
+  height: 38px;
+  margin-right: 7px;
+  float: left;
+}
+
+#search-box input {
+  margin: 0;
+  width: calc(100% - 52px);
+}
+
+input[type="search"]:focus {
+  border: 1px solid $primary-color;
+}
+
+.list-box {
+  width: 100%;
+  max-height: calc(100% - 62px);
+  overflow-y: auto;
+}
+
+.box .float-right {
+  float: right;
+}
+
+.concept table {
+  margin-bottom: 1rem;
+}
+
+.concept table td {
+  vertical-align: top;
+}
+
+.concept table th,
+.concept table td {
+  border-bottom-style: none;
+  padding: 6px 6px 6px 0px;
+}
+
+.concept table tr td.label:after {
+  content: ':';
+}
+
+.concept-alt-name {
+  font-style: italic;
+}
+
+.concept-alt-name:before {
+  content: '“';
+}
+
+.concept-alt-name:after  {
+  content: "”, ";
+}
+
+.concept-alt-name:last-child:after  {
+  content: "” ";
+}
+
+.source-list span:after {
+  content: " ";
+}
+
+.results {
+}
+
+.list {
+  list-style-type: none;
+  margin-bottom: 0;
+}
+
+.list li {
+  margin-bottom: 0;
+  clear: both;
+}
+
+.clear {
+  clear: both;
+}
+
+.list li:not(:last-child) {
+  margin-bottom: 2em;
+}
+
+ol#concepts li.selected {
+  background-color: rgba(255, 140, 140, 0.3);
+}
+
+ol#concepts h5 {
+  margin-bottom: 4px;
+}
+
+.box h5 code {
+  float: right;
+}
+
+.source-list {
+  list-style-type: none;
+  margin: 0;
+}
+
+.source-list li {
+  display: inline-block;
+}
+
+.buttons {
+  float: right;
+}
+
+button {
+  background-color: white;
+  text-transform: none;
+  font-size: 1.5rem;
+  margin-left: 10px;
+}
+
+button.select {
+  font-weight: bold;
+}
+
+#graph-box {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#graph {
+  width: 100%;
+  height: 100%;
+  z-index: 1001;
+}
+
+.container {
+  margin-top: 20px;
+}
+
+.drop-shadow {
+  box-shadow: 0px 0px 2px 2px rgba(200, 200, 200, 0.5);
+}
+
+
+
+
+#graph path {
+  fill: none;
+  stroke: #aaa;
+  stroke-width: 1.5px;
+  marker-end: url(#marker-arrow);
+}
+
+#marker-arrow path {
+  fill: #aaa;
+}
+
+#graph #licensing {
+  fill: green;
+}
+
+#graph .link.licensing {
+  stroke: green;
+}
+
+.link.resolved {
+  stroke-dasharray: 0,2 1;
+}
+
+.pit {
+  cursor: pointer;
+  fill: #ffe611;
+  stroke: #333;
+  stroke-width: 1.5px;
+}
+
+.pit.has-geometry {
+  fill: #0036fa;
+}
+
+text {
+  font: 15px "Consolas";
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
