@@ -28,21 +28,27 @@ String.prototype.hashCode = function() {
 var ConceptsBox = React.createClass({
 
   render: function() {
-
     if (this.props.geojson.features && this.props.geojson.features.length > 0) {
+      var className = this.props.hidden ? "hidden" : "";
+
       return (
-        <div>
-          <ConceptsBoxResults features={this.props.geojson.features} />
+        <div className={className}>
+          <ConceptsBoxResults features={this.props.geojson.features} hide={this.handleHide}/>
           <ConceptsBoxList features={this.props.geojson.features} />
         </div>
       );
     } else {
       return (
-        <div>
-          <ConceptsBoxResults features={this.props.geojson.features} />
+        <div className={className}>
+          <ConceptsBoxResults features={this.props.geojson.features} hide={boundHide}/>
         </div>
       );
     }
+  },
+
+  handleHide: function() {
+    this.props.hidden = true;
+    this.forceUpdate();
   }
 });
 
@@ -59,14 +65,18 @@ var ConceptsBoxResults = React.createClass({
     return (
       <div id="concepts-results" className="padding results">
         <span id="concepts-results-message">{message}</span>
-        <a id="concepts-close" className="float-right" href="#">Close</a>
+        <a id="concepts-close" className="float-right" href="#" onClick={this.props.hide}>Close</a>
       </div>
     );
   }
 });
 
 var ConceptsBoxList = React.createClass({
+  handleItemSelect: function(index) {
+    console.log(index, "jaatjes");
+  },
   render: function() {
+    var conceptsBoxList = this;
     return (
       <ol id="concepts" className="list">
         {this.props.features.map(function(feature, index) {
@@ -76,7 +86,9 @@ var ConceptsBoxList = React.createClass({
               .join(",")
               .hashCode();
 
-          return <ConceptsBoxListItem key={key} feature={feature} />;
+          var boundSelect = conceptsBoxList.handleItemSelect.bind(conceptsBoxList, index);
+
+          return <ConceptsBoxListItem key={key} feature={feature} onSelect={boundSelect}/>;
         })}
       </ol>
     );
@@ -111,6 +123,8 @@ var ConceptsBoxListItem = React.createClass({
     var name = sortedNames[0].name,
         selectedNames = sortedNames.slice(0, 4).map(function(name) { return name.name; }),
         selectedNamesRow;
+
+    this.name = name;
 
     if (selectedNames.length > 1) {
       var namesLengthDiff = sortedNames.length - selectedNames.length,
@@ -182,8 +196,6 @@ var ConceptsBoxListItem = React.createClass({
 
     geojsonLayers.addLayer(geojsonLayer);
 
-    //geojsonLayers.getLayerId(this.geojsonLayer)
-
     // HTML
     // ----------------------------------------------------------------------
 
@@ -209,12 +221,20 @@ var ConceptsBoxListItem = React.createClass({
           </tbody>
         </table>
         <div className="buttons">
-          <button className="select">Select</button>
-          <button className="zoom">Show</button>
+          <button className="select" onClick={this.props.onSelect}>Select</button>
+          <button className="zoom" onClick={this.zoom}>Show</button>
         </div>
         <div className="clear" />
       </li>
     );
+  },
+
+  zoom: function() {
+    fitBounds(this.geojsonLayer.getBounds());
+  },
+
+  select: function() {
+    console.log(this.name, this.props.feature);
   },
 
   componentWillUnmount: function() {
@@ -230,7 +250,7 @@ d3.selectAll("#search-input").on('keyup', function() {
     d3.json("{{ site.data.api.host }}search?name=" + value, function(geojson) {
 
       React.render(
-        <ConceptsBox geojson={geojson} />,
+        <ConceptsBox geojson={geojson} hidden={false}/>,
         document.getElementById('concepts-box')
       );
     });
