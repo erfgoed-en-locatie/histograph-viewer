@@ -1,4 +1,5 @@
 ---
+layout:
 ---
 
 Array.prototype.unique = function() {
@@ -81,10 +82,10 @@ var ConceptsBoxList = React.createClass({
     );
   },
   componentDidMount: function() {
-    fitBounds();
+    fitMapBounds();
   },
   componentDidUpdate: function() {
-    fitBounds();
+    fitMapBounds();
   }
 });
 
@@ -181,6 +182,7 @@ var ConceptsBoxListItem = React.createClass({
 
     geojsonLayers.addLayer(geojsonLayer);
 
+    //geojsonLayers.getLayerId(this.geojsonLayer)
 
     // HTML
     // ----------------------------------------------------------------------

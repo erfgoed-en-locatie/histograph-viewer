@@ -32,7 +32,11 @@ var map = L.map('map', {
 map.zoomControl.setPosition('topright');
 map.setView([52.2808, 5.4918], 9);
 
-function fitBounds() {
+function fitMapBounds() {
+  fitBounds(geojsonLayers.getBounds());
+}
+
+function fitBounds(bounds) {
   // TODO: take sidebar width into account!
-  map.fitBounds(geojsonLayers.getBounds());
+  map.fitBounds(bounds);
 }
