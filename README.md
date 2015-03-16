@@ -1,15 +1,9 @@
-# histograph-viewer
+# Histograph Viewer
 
-Expects [Histograph](https://github.com/erfgoed-en-locatie/histograph) to run on [http://localhost:3000/](http://localhost:3000/).
+To run, type
 
-Start `histograph-viewer` with:
+    jekyll serve  --baseurl '' --port 4001
 
-    python -m SimpleHTTPServer
+The viewer is now running on http://localhost:4001.
 
-Examples:
-
-- Name contains _"vissen"_: [localhost](http://localhost:8000/#name=.*vissen.*), [erfgeo.nl](http://www.erfgeo.nl/hg/#name=.*vissen.*)
-- URI `gemeentegeschiedenis/103` (Municipality of Amsterdam): [localhost](http://localhost:8000/#uri=gemeentegeschiedenis/103), [erfgeo.nl](http://www.erfgeo.nl/hg/#uri=gemeentegeschiedenis/103)
-- Roman towns: [localhost](http://localhost:8000/#name=traiectu.), [erfgeo.nl](http://www.erfgeo.nl/hg/#name=traiectu.)
-- Town of Monster: [localhost](http://localhost:8000/#name=monster), [erfgeo.nl](http://www.erfgeo.nl/hg/#name=monster)
-- Three Hengelo's: [localhost](http://localhost:8000/#name=hengelo), [erfgeo.nl](http://www.erfgeo.nl/hg/#name=hengelo)
+Edit [`_data/api.yml`](_data/api.yml) to set your local Histograph API endpoint.
