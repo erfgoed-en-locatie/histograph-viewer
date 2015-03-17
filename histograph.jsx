@@ -108,12 +108,11 @@ var ConceptsBoxList = React.createClass({
       </ol>
     );
   },
+
   componentDidMount: function() {
     fitMapBounds();
-  },
-  componentDidUpdate: function() {
-    fitMapBounds();
   }
+
 });
 
 var ConceptsBoxListItem = React.createClass({
