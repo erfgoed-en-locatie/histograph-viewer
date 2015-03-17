@@ -1,56 +1,67 @@
----
-layout:
----
-
-Array.prototype.unique = function() {
-	var n = {},
-      r=[];
-	for(var i = 0; i < this.length; i++) 	{
-		if (!n[this[i]]) {
-			n[this[i]] = true;
-			r.push(this[i]);
-		}
-	}
-	return r;
-}
-
-String.prototype.hashCode = function() {
-  var hash = 0, i, chr, len;
-  if (this.length == 0) return hash;
-  for (i = 0, len = this.length; i < len; i++) {
-    chr   = this.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
-
-var ConceptsBox = React.createClass({
+var ResultsBox = React.createClass({
 
   render: function() {
-    if (this.props.geojson.features && this.props.geojson.features.length > 0) {
-      var className = this.props.hidden ? "hidden" : "";
+    var conceptBox = null,
+        hideConceptList = false;
+
+    if (!this.props.geojson) {
+      return null;
+    }
+
+    if (this.props.selected != -1) {
+      var feature = this.props.geojson.features[this.props.selected],
+          hideConceptList = true
+      var conceptBox = (
+        <div>
+          <ConceptBoxResults feature={feature} back={this.handleBack}/>
+          <ConceptBoxList feature={feature}/>
+        </div>
+      );
+    }
+
+    if (this.props.geojson && this.props.geojson.features && this.props.geojson.features.length > 0) {
+      var className = (hideConceptList || this.props.hidden) ? "hidden" : "";
 
       return (
-        <div className={className}>
-          <ConceptsBoxResults features={this.props.geojson.features} hide={this.handleHide}/>
-          <ConceptsBoxList features={this.props.geojson.features} />
+        <div>
+          <div className={className}>
+            <ConceptsBoxResults features={this.props.geojson.features} hide={this.handleHide}/>
+            <ConceptsBoxList features={this.props.geojson.features} onSelect={this.handleSelect}/>
+          </div>
+          {conceptBox}
         </div>
       );
     } else {
       return (
         <div className={className}>
-          <ConceptsBoxResults features={this.props.geojson.features} hide={boundHide}/>
+          <ConceptsBoxResults error={this.props.error} hide={this.handleHide}/>
         </div>
       );
     }
   },
 
+  handleBack: function() {
+    this.setProps({
+      selected: -1
+    });
+  },
+
   handleHide: function() {
-    this.props.hidden = true;
-    this.forceUpdate();
+    this.setProps({
+      hidden: true
+    });
+  },
+
+  handleSelect: function(index) {
+    this.setProps({
+      selected: index
+    });
   }
 });
+
+/**
+ * Components for list of concepts
+ */
 
 var ConceptsBoxResults = React.createClass({
   render: function() {
@@ -58,8 +69,10 @@ var ConceptsBoxResults = React.createClass({
     if (this.props.features && this.props.features.length) {
       var subgraph = this.props.features.length == 1 ? "subgraph" : "subgraphs",
           message = this.props.features.length + " " + subgraph + " found:";
+    } else if (this.props.error) {
+      message = "Error: " + this.props.error;
     } else {
-      message = "No subgraphs found"
+      message = "No subgraphs found";
     }
 
     return (
@@ -72,9 +85,11 @@ var ConceptsBoxResults = React.createClass({
 });
 
 var ConceptsBoxList = React.createClass({
-  handleItemSelect: function(index) {
-    console.log(index, "jaatjes");
+
+  handleSelect: function(index) {
+    this.props.onSelect(index)
   },
+
   render: function() {
     var conceptsBoxList = this;
     return (
@@ -86,7 +101,7 @@ var ConceptsBoxList = React.createClass({
               .join(",")
               .hashCode();
 
-          var boundSelect = conceptsBoxList.handleItemSelect.bind(conceptsBoxList, index);
+          var boundSelect = conceptsBoxList.handleSelect.bind(conceptsBoxList, index);
 
           return <ConceptsBoxListItem key={key} feature={feature} onSelect={boundSelect}/>;
         })}
@@ -104,27 +119,10 @@ var ConceptsBoxList = React.createClass({
 var ConceptsBoxListItem = React.createClass({
   render: function() {
     var feature = this.props.feature,
-        names = feature.properties.pits.map(function(pit) { return pit.name; });
-
-    var counts = { };
-    for (var k = 0, j = names.length; k < j; k++) {
-      counts[names[k]] = (counts[names[k]] || 0) + 1;
-    }
-
-    var sortedNames = Object.keys(counts).map(function(name) {
-      return {
-        name: name,
-        count: counts[name]
-      };
-    }).sort(function(a, b) {
-      return b.count - a.count;
-    });
-
-    var name = sortedNames[0].name,
+        sortedNames = sortNames(feature.properties.pits),
+        selectedName = sortedNames[0].name,
         selectedNames = sortedNames.slice(0, 4).map(function(name) { return name.name; }),
         selectedNamesRow;
-
-    this.name = name;
 
     if (selectedNames.length > 1) {
       var namesLengthDiff = sortedNames.length - selectedNames.length,
@@ -150,8 +148,46 @@ var ConceptsBoxListItem = React.createClass({
       .map(function(pit) { return pit.source; })
       .unique();
 
-    // Leaflet GeoJSON Layer
+
+    // HTML
     // ----------------------------------------------------------------------
+
+    return (
+      <li className="padding concept">
+        <h5>
+          <span>{selectedName}</span>
+          <code>{feature.properties.type.replace("hg:", "")}</code>
+        </h5>
+        <table>
+          <tbody>
+            {selectedNamesRow}
+            <tr>
+              <td className="label">Sources</td>
+              <td>
+                <span className="source-list">
+                  {sources.map(function(source, index) {
+                    return <span key={index}><code>{source}</code></span>;
+                  })}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="buttons">
+          <button className="select" onClick={this.props.onSelect}>Select</button>
+          <button className="zoom" onClick={this.zoom}>Show</button>
+        </div>
+        <div className="clear" />
+      </li>
+    );
+  },
+
+  zoom: function() {
+    fitBounds(this.geojsonLayer.getBounds());
+  },
+
+  componentDidMount: function() {
+    var feature = this.props.feature;
 
     this.geojsonLayer = new L.geoJson(null, {
       style: lineStyle,
@@ -195,46 +231,6 @@ var ConceptsBoxListItem = React.createClass({
     });
 
     geojsonLayers.addLayer(geojsonLayer);
-
-    // HTML
-    // ----------------------------------------------------------------------
-
-    return (
-      <li className="padding concept">
-        <h5>
-          <span>{name}</span>
-          <code>{feature.properties.type.replace("hg:", "")}</code>
-        </h5>
-        <table>
-          <tbody>
-            {selectedNamesRow}
-            <tr>
-              <td className="label">Sources</td>
-              <td>
-                <span className="source-list">
-                  {sources.map(function(source, index) {
-                    return <span key={index}><code>{source}</code></span>;
-                  })}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="buttons">
-          <button className="select" onClick={this.props.onSelect}>Select</button>
-          <button className="zoom" onClick={this.zoom}>Show</button>
-        </div>
-        <div className="clear" />
-      </li>
-    );
-  },
-
-  zoom: function() {
-    fitBounds(this.geojsonLayer.getBounds());
-  },
-
-  select: function() {
-    console.log(this.name, this.props.feature);
   },
 
   componentWillUnmount: function() {
@@ -243,24 +239,92 @@ var ConceptsBoxListItem = React.createClass({
   }
 });
 
+/**
+ * Components for single concept
+ */
+
+var ConceptBoxResults = React.createClass({
+  render: function() {
+    var sortedNames = sortNames(this.props.feature.properties.pits),
+        selectedName = sortedNames[0].name;
+        pitCount = this.props.feature.properties.pits.length,
+        relCount = this.props.feature.properties.relations.length,
+        message = pitCount
+            + ((pitCount == 1) ? " PIT" : " PITs")
+            + ", "
+            + relCount
+            + ((relCount == 1) ? " relation" : " relations");
+
+    return (
+      <div>
+        <div id="pits-results" className="padding results">
+          1 concept selected:
+          <a id="pits-close" className="float-right" href="#" onClick={this.props.back}>Back to concept list</a>
+        </div>
+        <div id="pits-header" className="padding">
+          <h5>{selectedName}<code>Place</code></h5>
+          {message}
+          <a id="show-graph" className="float-right" href="#">Show graph</a>
+        </div>
+      </div>
+    );
+  }
+});
+
+var ConceptBoxList = React.createClass({
+  render: function() {
+    return (
+      <ol id="pits" className="list">
+        {this.props.feature.properties.pits.map(function(pit, index) {
+          //var boundSelect = conceptsBoxList.handleSelect.bind(conceptsBoxList, index);
+          return <Pit key={pit.hgid} pit={pit}/>;
+        })}
+      </ol>
+    );
+  }
+});
+
+var Pit = React.createClass({
+  render: function() {
+    var pit = this.props.pit;
+
+    return (
+      <li className="padding pit">
+        <h6 className="concept-alt-name">{pit.name}</h6>
+        <div><code>{pit.hgid}</code></div>
+      </li>
+    );
+  }
+});
+
+/**
+ * D3.js - GeoJSON from Histograph API
+ */
 
 d3.selectAll("#search-input").on('keyup', function() {
-  if(d3.event.keyCode == 13){
-    var value = d3.select(this).property('value').trim();
-    d3.json("{{ site.data.api.host }}search?name=" + value, function(geojson) {
+  if (d3.event.keyCode == 13) {
+    var value = d3.select(this).property('value');
+    d3.json(getApiUrl(value), function(error, geojson) {
+      var errorMessage = null;
+      if (error) {
+        try {
+          errorMessage = JSON.parse(error.response).error;
+        } catch (e) {
+          errorMessage = "Invalid reponse from Histograph API";
+        }
+      }
+      resultsBox.setProps({
+        geojson: geojson,
+        error: errorMessage,
+        selected: -1,
+        hidden: false
+      });
 
-      React.render(
-        <ConceptsBox geojson={geojson} hidden={false}/>,
-        document.getElementById('concepts-box')
-      );
     });
   }
 });
 
-
-// <div id="concepts-results" class="padding results">
-//   <span id="concepts-count"></span> <span id="concepts-concepts"></span> found:
-//   <a id="concepts-close" class="float-right" href="#">Close</a>
-// </div>
-// <ol id="concepts" class="list">
-// </ol>
+var resultsBox = React.render(
+  <ResultsBox />,
+  document.getElementById('concepts-box')
+);
