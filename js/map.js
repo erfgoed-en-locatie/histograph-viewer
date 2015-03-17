@@ -1,10 +1,6 @@
 ---
 ---
 
-// ================================================================================
-// Leaflet map initialization
-// ================================================================================
-
 var map = L.map('map', {
       //zoomControl: false
     }),
@@ -37,6 +33,8 @@ function fitMapBounds() {
 }
 
 function fitBounds(bounds) {
-  // TODO: take sidebar width into account!
-  map.fitBounds(bounds);
+  var width = document.getElementById("sidebar-container").offsetWidth;
+  map.fitBounds(bounds, {
+    paddingTopLeft: [width, 0]
+  });
 }
