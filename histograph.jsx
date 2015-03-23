@@ -422,6 +422,16 @@ var ConceptBoxList = React.createClass({
           ref={'item' + index} updateOtherPits={boundUpdateOtherPits}/>;
     }.bind(this));
 
+    var filterMessage;
+    if (filteredPits.length > 0) {
+      filterMessage = <span>
+          Showing {filteredPits.length} place {filteredPits.length == 1 ? "name" : "names"} ({geometryCount} on map):
+          <a id="loop-pits" className="float-right" href="#" onClick={this.loop}>Loop <img src="images/rocket.png" height="18px"/></a>
+          </span>;
+    } else {
+      filterMessage = <span>No place names matching your filter</span>;
+    }
+
     return (
       <div>
         <div className="padding">
@@ -440,7 +450,7 @@ var ConceptBoxList = React.createClass({
                     {sources.map(function(source, index) {
                       var boundFilterSource = this.filterSource.bind(this, source),
                           className = this.state.filters.sources[source] ? "" : "filtered";
-                      return <span><a className={className} key={source} href="#"
+                      return <span key={source}><a className={className} href="#"
                                 onClick={boundFilterSource}><code>{source}</code></a> </span>;
                     }.bind(this))}
                   </span>
@@ -459,8 +469,7 @@ var ConceptBoxList = React.createClass({
             </tbody>
           </table>
           <p>
-            Showing {filteredPits.length} place names ({geometryCount} on map):
-            <a id="loop-pits" className="float-right" href="#" onClick={this.loop}>Loop <img src="images/rocket.png" height="18px"/></a>
+            {filterMessage}
           </p>
         </div>
         <ol id="pits" className="list">
