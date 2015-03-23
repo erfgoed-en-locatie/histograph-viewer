@@ -207,9 +207,9 @@ var ConceptsBoxListItem = React.createClass({
           </tbody>
         </table>
         <div className="buttons">
-          <button className="details" onClick={this.details}>Details...</button>
-          <button className="zoom" onClick={this.zoom}>Zoom</button>
-          <button className="select" onClick={this.select}>Select</button>
+          <button className="details" onClick={this.details} title="Show concept's details">Details...</button>
+          <button className="zoom" onClick={this.zoom} title="Zoom and pan map to concept">Zoom</button>
+          <button className="select" onClick={this.select} title="Highlight concept on map (and fade others)">Select</button>
         </div>
         <div className="clear" />
       </li>
@@ -572,8 +572,8 @@ var Pit = React.createClass({
 
       buttons = (
         <div className="buttons">
-          <button className="zoom" onClick={this.zoom}>Zoom</button>
-          <button className="select" onClick={this.select}>Select</button>
+          <button className="zoom" onClick={this.zoom} title="Zoom and pan map to place name">Zoom</button>
+          <button className="select" onClick={this.select} title="Select place name (and fade others)">Select</button>
         </div>
       );
     }
