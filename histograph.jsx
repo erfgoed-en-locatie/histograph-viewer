@@ -644,6 +644,9 @@ var Graph = React.createClass({
   },
 
   componentDidUpdate: function() {
+    // #graph has fixed position, z-index does not work...
+    d3.select("#map .leaflet-control-container").classed("hidden", !this.props.graphHidden);
+
     d3.select("#graph")
         .datum(this.props.feature)
         .call(graph());
