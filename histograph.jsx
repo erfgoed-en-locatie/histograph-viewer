@@ -217,6 +217,7 @@ var ConceptsBoxListItem = React.createClass({
     if (!params.noFitBounds) {
       fitBounds(this.featureGroup.getBounds());
     }
+    document.getElementById("concepts-box").scrollTop = 0;
 
     this.props.updateOtherConcepts({selected: false, unfade: false, disabled: true});
     this.setState({selected: true, unfade: false, disabled: false});
@@ -226,6 +227,9 @@ var ConceptsBoxListItem = React.createClass({
   zoom: function(params) {
     if (!params.noFitBounds) {
       fitBounds(this.featureGroup.getBounds());
+    } else {
+      //TODO: fix -60 hack!
+      document.getElementById("concepts-box").scrollTop = React.findDOMNode(this).offsetTop - 60;
     }
 
     this.props.updateOtherConcepts({selected: false, unfade: false});
@@ -341,7 +345,7 @@ var ConceptBoxResults = React.createClass({
 var ConceptBoxList = React.createClass({
   getInitialState: function() {
     var sortFields = [
-          "relations",
+          "# relations",
           "name",
           "period",
           "source"
@@ -378,8 +382,8 @@ var ConceptBoxList = React.createClass({
         if (this.state.sortField == "name") {
           return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         } else if (this.state.sortField == "period") {
-          var dateA = a.beginDate || a.endDate,
-              dateB = b.beginDate || b.endDate;
+          var dateA = a.startDate || a.endDate,
+              dateB = b.startDate || b.endDate;
 
           // http://stackoverflow.com/questions/11526504/minimum-and-maximum-date
           if (!dateA) dateA = 8640000000000000;
