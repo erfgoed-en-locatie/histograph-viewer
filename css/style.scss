@@ -122,8 +122,16 @@ h5 code {
   position: absolute;
 }
 
+.indent {
+  margin-left: 1em;
+}
+
 .padding {
   padding: 7px;
+}
+
+.cell-padding {
+  padding-top: 6px;
 }
 
 #map {
@@ -247,7 +255,7 @@ input[type="search"]:focus {
   content: " ";
 }
 
-.source-list > *.filtered {
+.source-list span *.filtered {
   opacity: 0.5;
 }
 
@@ -318,9 +326,14 @@ button {
   text-transform: none;
   font-size: 1.5rem;
   margin-left: 10px;
+
+  height: 35px;
+  line-height: 35px;
+  padding: 0 13px;
+  font-weight: lighter;
 }
 
-button.select {
+button.details {
   font-weight: bold;
 }
 

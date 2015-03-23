@@ -1,3 +1,5 @@
+// path = [searchUrl, hgid]
+
 var ResultsBox = React.createClass({
 
   getInitialState: function() {
@@ -78,8 +80,8 @@ var ConceptsBoxResults = React.createClass({
   render: function() {
     var message;
     if (this.props.features && this.props.features.length) {
-      var subgraph = this.props.features.length == 1 ? "subgraph" : "subgraphs",
-          message = this.props.features.length + " " + subgraph + " found:";
+      var concept = this.props.features.length == 1 ? "concept" : "concepts",
+          message = this.props.features.length + " " + concept+ " found:";
     } else if (this.props.error) {
       message = "Error: " + this.props.error;
     } else {
@@ -189,7 +191,7 @@ var ConceptsBoxListItem = React.createClass({
           <span>{selectedName}</span>
           <code>{feature.properties.type.replace("hg:", "")}</code>
         </h5>
-        <table>
+        <table className="indent">
           <tbody>
             {selectedNamesRow}
             <tr>
@@ -205,18 +207,17 @@ var ConceptsBoxListItem = React.createClass({
           </tbody>
         </table>
         <div className="buttons">
-          <button className="select" onClick={this.select}>Details...</button>
-          <button className="zoom" onClick={this.zoom}>Show</button>
+          <button className="details" onClick={this.details}>Details...</button>
+          <button className="zoom" onClick={this.zoom}>Zoom</button>
+          <button className="select" onClick={this.select}>Select</button>
         </div>
         <div className="clear" />
       </li>
     );
   },
 
-  select: function(params) {
-    if (!params.noFitBounds) {
-      fitBounds(this.featureGroup.getBounds());
-    }
+  details: function(params) {
+    fitBounds(this.featureGroup.getBounds());
     document.getElementById("concepts-box").scrollTop = 0;
 
     this.props.updateOtherConcepts({selected: false, unfade: false, disabled: true});
@@ -232,6 +233,11 @@ var ConceptsBoxListItem = React.createClass({
       document.getElementById("concepts-box").scrollTop = React.findDOMNode(this).offsetTop - 60;
     }
 
+    this.props.updateOtherConcepts({selected: false, unfade: false});
+    this.setState({selected: true, unfade: false});
+  },
+
+  select: function(params) {
     this.props.updateOtherConcepts({selected: false, unfade: false});
     this.setState({selected: true, unfade: false});
   },
@@ -274,8 +280,8 @@ var ConceptsBoxListItem = React.createClass({
         onEachFeature: function(feature, layer) {
           layer.on('click', function (e) {
             _this.zoom({
-              noFitBounds: true,
-              scrollList: true
+              hgid: feature.hgid,
+              noFitBounds: true
             });
           });
         }
@@ -329,9 +335,10 @@ var ConceptBoxResults = React.createClass({
         </div>
         <div id="pits-header" className="padding">
           <h5>{selectedName}<code>{this.props.feature.properties.type.replace("hg:", "")}</code></h5>
-          {message}
-          <a id="show-graph" className="float-right" href="#" onClick={this.showGraph}>{this.props.graphHidden ? "Show graph" : "Hide graph"}</a>
-
+          <div className="cell-padding">
+            {message}
+            <a id="show-graph" className="float-right" href="#" onClick={this.showGraph}>{this.props.graphHidden ? "Show graph" : "Hide graph"}</a>
+          </div>
         </div>
       </div>
     );
@@ -368,6 +375,15 @@ var ConceptBoxList = React.createClass({
     };
   },
 
+  updateOtherPits: function(callingIndex, state) {
+    for (var ref in this.refs) {
+      var item = this.refs[ref];
+      if (callingIndex != item.props.index) {
+        item.setState(state);
+      }
+    }
+  },
+
   render: function() {
     var sources = this.props.feature.properties.pits
             .map(function(pit) { return pit.source; })
@@ -396,14 +412,20 @@ var ConceptBoxList = React.createClass({
       }.bind(this));
     }
 
+    var geometryCount = filteredPits.filter(function(pit) {
+      return pit.geometryIndex > -1;
+    }).length;
+
     filteredPits = filteredPits.map(function(pit, index) {
-      return <Pit key={pit.hgid} pit={pit} feature={this.props.feature}/>;
+      var boundUpdateOtherPits = this.updateOtherPits.bind(this, index);
+      return <Pit key={pit.hgid} pit={pit} feature={this.props.feature}
+          ref={'item' + index} updateOtherPits={boundUpdateOtherPits}/>;
     }.bind(this));
 
     return (
       <div>
         <div className="padding">
-          <table>
+          <table className="indent">
             <tbody>
               <tr>
                 <td className="label">Names</td>
@@ -418,8 +440,8 @@ var ConceptBoxList = React.createClass({
                     {sources.map(function(source, index) {
                       var boundFilterSource = this.filterSource.bind(this, source),
                           className = this.state.filters.sources[source] ? "" : "filtered";
-                      return <a className={className} key={source} href="#"
-                                onClick={boundFilterSource}><code>{source}</code></a>;
+                      return <span><a className={className} key={source} href="#"
+                                onClick={boundFilterSource}><code>{source}</code></a> </span>;
                     }.bind(this))}
                   </span>
                 </td>
@@ -427,17 +449,17 @@ var ConceptBoxList = React.createClass({
               <tr>
                 <td className="label">Sort</td>
                 <td className="sort-fields">
-                  {this.state.sortFields.map(function(field) {
+                  {this.state.sortFields.map(function(field, index) {
                     var boundSort = this.sort.bind(this, field),
                         className = this.state.sortField === field ? "selected" : "";
-                    return <span><a className={className} key={field} href="#" onClick={boundSort}>{field}</a></span>;
+                    return <span key={field}><a className={className} href="#" onClick={boundSort}>{field}</a></span>;
                   }.bind(this))}
                 </td>
               </tr>
             </tbody>
           </table>
           <p>
-            Showing {filteredPits.length} place names (x on map):
+            Showing {filteredPits.length} place names ({geometryCount} on map):
             <a id="loop-pits" className="float-right" href="#" onClick={this.loop}>Loop <img src="images/rocket.png" height="18px"/></a>
           </p>
         </div>
@@ -491,6 +513,13 @@ var ConceptBoxList = React.createClass({
 });
 
 var Pit = React.createClass({
+  getInitialState: function() {
+    return {
+      selected: false,
+      unfade: true
+    };
+  },
+
   render: function() {
     var pit = this.props.pit,
         uriRow,
@@ -534,13 +563,16 @@ var Pit = React.createClass({
 
       buttons = (
         <div className="buttons">
-          <button className="zoom" onClick={this.zoom}>Show</button>
+          <button className="zoom" onClick={this.zoom}>Zoom</button>
+          <button className="select" onClick={this.select}>Select</button>
         </div>
       );
     }
 
+    var className = "padding pit" + (!this.state.selected &! this.state.unfade ? " faded" : "");
+
     return (
-      <li className="padding pit">
+      <li className={className}>
         <h6>{pit.name}{geometrySpan}</h6>
         <div>
           <table>
@@ -558,7 +590,31 @@ var Pit = React.createClass({
         </div>
       </li>
     );
-  }
+  },
+
+
+
+
+  zoom: function(params) {
+    if (!params.noFitBounds) {
+      console.log("Zoom naar PIT (maak functie)")
+      // Ja, nu dus terug naar dinges, en dan conceptlijst in
+      //fitBounds(this.featureGroup.getBounds());
+    } else {
+      //TODO: fix -60 hack!
+      document.getElementById("concepts-box").scrollTop = React.findDOMNode(this).offsetTop - 60;
+    }
+
+    this.props.updateOtherPits({selected: false, unfade: false});
+    this.setState({selected: true, unfade: false});
+  },
+
+  select: function(params) {
+    this.props.updateOtherPits({selected: false, unfade: false});
+    this.setState({selected: true, unfade: false});
+  },
+
+
 });
 
 var Graph = React.createClass({
@@ -601,6 +657,7 @@ d3.selectAll("#search-input").on('keyup', function() {
           errorMessage = "Invalid reponse from Histograph API";
         }
       }
+      document.getElementById("concepts-box").scrollTop = 0;
       resultsBox.setProps({
         geojson: geojson,
         error: errorMessage,
