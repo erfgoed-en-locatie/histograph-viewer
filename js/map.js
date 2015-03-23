@@ -14,14 +14,16 @@ var map = L.map('map', {
       color: color,
       fillColor: color,
       fill: true,
-      radius: 7
+      radius: 9,
+      opacity: 0.95
     },
 
     fadedPointStyle = {
       color: color,
       fillColor: color,
       fill: true,
-      radius: 9
+      radius: 7,
+      opacity: 0.25
     },
 
     lineStyle = {
