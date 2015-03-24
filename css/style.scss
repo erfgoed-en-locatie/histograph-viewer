@@ -409,18 +409,18 @@ h6 {
   stroke-dasharray: 0,2 1;
 }
 
-.pit {
-  fill: #ffe611;
+.graph-pit {
+  fill: white;
   stroke: #333;
   stroke-width: 1.5px;
 }
 
-.pit.has-geometry {
-  fill: #0036fa;
+.graph-pit.has-geometry {
+  fill: $primary-color;
 }
 
 text {
-  font: 15px "Consolas";
+  font-size: 15px;
   pointer-events: none;
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
 }

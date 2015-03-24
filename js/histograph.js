@@ -1,409 +1,757 @@
----
----
+// path = [searchUrl, hgid]
 
-var geojson,
-    endpoint = "http://{{ site.data.api.host }}/";
+var ResultsBox = React.createClass({displayName: "ResultsBox",
 
-var width = window.innerWidth,
-    height = window.innerHeight;
+  getInitialState: function() {
+    return {
+      graphHidden: true,
+      featureGroups: L.featureGroup().addTo(map),
+      pitLayers: {}
+    };
+  },
 
-var circleRadius = 6;
+  render: function() {
+    var conceptBox = null,
+        hideConceptList = false;
 
-Array.prototype.unique = function() {
-	var n = {},
-      r=[];
-	for(var i = 0; i < this.length; i++) 	{
-		if (!n[this[i]]) {
-			n[this[i]] = true;
-			r.push(this[i]);
-		}
-	}
-	return r;
-}
-
-// ================================================================================
-// Leaflet map initialization
-// ================================================================================
-
-var map = L.map('map', {
-      //zoomControl: false
-    }),
-    color = 'rgba({{ site.data.style.color }}, 1)',
-    tileUrl = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-  	attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-  	disableHashChange = false,
-    subdomains = 'abcd',
-    pointStyle = {},
-    lineStyle = {
-      color: color,
-      weight: 3,
-      opacity: 0.65
-    },
-    tileLayer = L.tileLayer(tileUrl, {
-      subdomains: subdomains,
-      attribution: attribution,
-      minZoom: 4, maxZoom: 18,
-      opacity: 1
-    }).addTo(map),
-    geojsonLayers = L.featureGroup().addTo(map),
-    geojsonLayerIds = [],
-    geometryTypeOrder = [
-      "Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"
-    ];
-
-map.zoomControl.setPosition('topright');
-map.setView([52.2808, 5.4918], 9);
-
-d3.selectAll("#search-input").on('keyup', function() {
-  if(d3.event.keyCode == 13){
-    var value = d3.select(this).property('value').trim();
-
-    if (value.indexOf("http") == 0) {
-      getData('uri', value);
-    } else if (value.indexOf("/") > -1) {
-      getData('hgid', value);
-    } else {
-      getData('name', value);
+    if (!this.props.geojson) {
+      return null;
     }
+
+    if (this.props.selected != -1) {
+      var feature = this.props.geojson.features[this.props.selected],
+          hideConceptList = true
+      var conceptBox = (
+        React.createElement("div", null, 
+          React.createElement(ConceptBoxResults, {feature: feature, back: this.handleBack, showGraph: this.showGraph, graphHidden: this.state.graphHidden}), 
+          React.createElement(ConceptBoxList, {feature: feature, featureGroups: this.state.featureGroups, 
+              pitLayers: this.state.pitLayers}), 
+          React.createElement(Graph, {feature: feature, graphHidden: this.state.graphHidden})
+        )
+      );
+    }
+
+    if (this.props.geojson && this.props.geojson.features && this.props.geojson.features.length > 0) {
+      var className = (hideConceptList || this.props.hidden) ? "hidden" : "";
+
+      return (
+        React.createElement("div", null, 
+          React.createElement("div", {className: className}, 
+            React.createElement(ConceptsBoxResults, {features: this.props.geojson.features, hide: this.handleHide}), 
+            React.createElement(ConceptsBoxList, {features: this.props.geojson.features, featureGroups: this.state.featureGroups, 
+                pitLayers: this.state.pitLayers, onSelect: this.handleSelect})
+          ), 
+          conceptBox
+        )
+      );
+    } else {
+      return (
+        React.createElement("div", {className: className}, 
+          React.createElement(ConceptsBoxResults, {error: this.props.error, hide: this.handleHide})
+        )
+      );
+    }
+  },
+
+  showGraph: function() {
+    this.setState({graphHidden: !this.state.graphHidden});
+  },
+
+  handleBack: function() {
+    this.setProps({
+      selected: -1
+    });
+  },
+
+  handleHide: function() {
+    this.setProps({
+      hidden: true
+    });
+  },
+
+  handleSelect: function(index) {
+    this.setProps({
+      selected: index
+    });
   }
 });
 
+/**
+ * Components for list of concepts
+ */
 
-d3.select("#show-graph")
-    .on("click", function() {
-      d3.select("#graph-container").classed("hidden", false);
-
-      // // calling textBlock() returns the function object textBlock().my
-      // // via which we set the "label" property of the textBlock outer func
-      // var tb = d3.textBlock().label(function(d) {return d.label;});
-      // // now we apply the returned function object my == tb on an enter selection
-      // var item = svg.selectAll("rect")
-      //     .data(items)
-      //   .enter()
-      //     .append("svg:g")
-      //     .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-      //     .call(tb);
-
-    });
-
-d3.select("#concepts-close")
-    .on("click", function() {
-      d3.select("#concepts-box").classed("hidden", true);
-    });
-
-d3.select("#pits-close")
-    .on("click", function() {
-      d3.select("#pits-box").classed("hidden", true);
-      d3.select("#concepts-box").classed("hidden", false);
-    });
-
-
-function createPitList(conceptIndex) {
-  d3.select("#pits").selectAll("li.pit").remove();
-
-  var concept = d3.select("#concepts .concept:nth-child(" + (conceptIndex + 1) + ")").datum();
-
-  if (concept && concept.properties.pits && concept.properties.pits.length > 0) {
-
-    d3.select("#pits-count").html(concept.properties.pits.length);
-    d3.select("#relations-count").html(concept.properties.relations.length);
-
-    d3.select("#pits").selectAll("li.pit")
-        .data(concept.properties.pits)
-        .enter()
-      .append("li")
-        .attr("class", "padding pit")
-        .each(createPitListItem(concept));
-
-    //d3.select("#concepts-count").html(geojson.features.length);
-    //d3.select("#concepts-concepts").html(geojson.features.length == 1 ? "concept" : "concepts");
-    d3.select("#pits-box").classed("hidden", false);
-  } else {
-    // TODO: refactor, create function
-    d3.select("#pits-box").classed("hidden", true);
-  }
-}
-
-function createPitListItem(concept, d, pitIndex) {
-  return function (d, pitIndex) {
-    var li = d3.select(this);
-
-    li.append("h6").attr("class", "concept-alt-name").html(d.name);
-
-    li.append("div").append("code").html(d.source);
-    li.append("div").append("code").html(d.hgid);
-    li.append("div").html(d.uri);
-
-    var dateString;
-    if (d.startDate && d.endDate) {
-      dateString = d.startDate + " - " + d.endDate;
-    } else if (d.startDate) {
-      dateString = "From " + d.startDate;
-    } else if (d.endDate) {
-      dateString = "Until " + d.endDate;
-    }
-
-    if (dateString) {
-      li.append("div").html(dateString);
-    }
-
-
-    if (d.geometryIndex >= 0) {
-      li.append("div").html(concept.geometry.geometries[d.geometryIndex].type);
-    }
-
-    //li.append("div").html(d.uri);
-    // geometry.type
-  }
-}
-
-function createConceptListItem(d, conceptIndex) {
-  var names = d.properties.pits.map(function(pit) { return pit.name; });
-
-  var counts = { };
-  for (var k = 0, j = names.length; k < j; k++) {
-    counts[names[k]] = (counts[names[k]] || 0) + 1;
-  }
-
-  var sorted = Object.keys(counts).map(function(name) {
-    return {
-      name: name,
-      count: counts[name]
-    };
-  }).sort(function(a, b) {
-    if (a.count > b.count) {
-      return -1;
-    } else if (a.count < b.count) {
-      return 1;
+var ConceptsBoxResults = React.createClass({displayName: "ConceptsBoxResults",
+  render: function() {
+    var message;
+    if (this.props.features && this.props.features.length) {
+      var concept = this.props.features.length == 1 ? "concept" : "concepts",
+          message = this.props.features.length + " " + concept+ " found:";
+    } else if (this.props.error) {
+      message = "Error: " + this.props.error;
     } else {
-      return 0;
+      message = "No concepts found";
     }
-  });
 
-  var name = sorted[0].name,
-      names = sorted.slice(0, 4).map(function(name) { return name.name; });
-
-  var li = d3.select(this);
-
-  // li.append("img")
-  //     .attr("class", "concept-zoom-in")
-  //     .attr("src", "images/zoom-in.svg")
-  //     .on("click", function() {
-  //       map.fitBounds(geojsonLayers[conceptIndex].getBounds());
-  //     });
-
-  var header = li.append("h5")
-      // .on("click", function() {
-      //   d3.selectAll("ol#concepts li").classed("selected", false);
-      //   d3.select(this.parentNode).classed("selected", true);
-      //
-      //   geojsonLayers.forEach(function(geojsonLayer, layerIndex) {
-      //     geojsonLayers[layerIndex].eachLayer(function (layer) {
-      //       layer.setStyle({color: color});
-      //     });
-      //
-      //   });
-      //
-      //   geojsonLayers[conceptIndex].eachLayer(function (layer) {
-      //     layer.setStyle({color :'red'});
-      //   });
-      //
-      // })
-
-  header.append("span").html(name);
-  header.append("code").html(d.properties.type.replace("hg:", ""));
-
-  li.append("div").html("Reason found:")
-
-  if (names.length > 1) {
-    var namesHtml = names
-          .map(function(name) { return '<span class="concept-alt-name">' + name + '</span>'; })
-          .join(", "),
-        namesLengthDiff = sorted.length - names.length,
-        namesPlurSing = namesLengthDiff == 1 ? "name" : "names",
-        namesSuffix = sorted.length > names.length ? " and " + namesLengthDiff + " other " +  namesPlurSing: "";
-
-    li.append("div")
-        .html("Names: " + namesHtml + namesSuffix);
+    return (
+      React.createElement("div", {id: "concepts-results", className: "padding results"}, 
+        React.createElement("span", {id: "concepts-results-message"}, message), 
+        React.createElement("a", {id: "concepts-close", className: "float-right", href: "#", onClick: this.props.hide}, "Close")
+      )
+    );
   }
+});
 
-  var sources = d.properties.pits
-    //.filter(function(pit) { return pit.geometryIndex >= 0; })
-    .map(function(pit) { return pit.source; })
-    .unique();
+var ConceptsBoxList = React.createClass({displayName: "ConceptsBoxList",
 
-  li.append("ul")
-      .attr("class", "source-list")
-      .selectAll("li")
-      .data(sources)
-      .enter()
-    .append("li")
-    .append("a")
-      .attr("href", "#")
-      .on("click", function(d) {
+  handleSelect: function(index) {
+    this.props.onSelect(index)
+  },
 
-      })
-    .append("code")
-      .html(function(d) { return d; });
-
-  var buttons = li.append("div").attr("class", "buttons");
-  buttons.append("button")
-      .attr("class", "select")
-      .html("Select")
-      .on("click", function() {
-        createPitList(conceptIndex);
-        d3.select("#concepts-box").classed("hidden", true);
-        map.fitBounds(geojsonLayers.getLayer(geojsonLayerIds[conceptIndex]).getBounds());
-      });
-
-  buttons.append("button")
-      .attr("class", "zoom")
-      .html("Show")
-      .on("click", function() {
-        selectConcept(conceptIndex);
-      });
-
-
-//   var dates = d.properties.pits
-//     .filter(function(pit) { return pit.geometryIndex > -1 && (pit.startDate || pit.endDate); })
-//     .map(function(pit) { return [pit.startDate, pit.endDate]; })
-//     .reduce(function(a, b) {
-//       return a.concat(b);
-//     })
-//     .filter(function(date) { return date; })
-//     .sort(function(a, b) {
-//       return new Date(b.date) - new Date(a.date);
-//     });
-// console.log(dates)
-
-
-  var geojsonLayer = new L.geoJson(null, {
-    style: lineStyle,
-    pointToLayer: function (feature, latlng) {
-      return L.circleMarker(latlng, pointStyle);
-    },
-    onEachFeature: function(feature, layer) {
-      layer.on('click', function (e) {
-        var properties = e.target.feature.properties;
-        selectConcept(properties.conceptIndex, properties.pitIndex);
-      });
+  updateOtherConcepts: function(callingIndex, state) {
+    for (var ref in this.refs) {
+      var item = this.refs[ref];
+      if (callingIndex != item.props.index) {
+        item.setState(state);
+      }
     }
-  }).addTo(map);
+  },
 
-  geojsonLayers.addLayer(geojsonLayer);
-  geojsonLayerIds.push(geojsonLayers.getLayerId(geojsonLayer));
+  render: function() {
+    return (
+      React.createElement("ol", {id: "concepts", className: "list"}, 
+        this.props.features.map(function(feature, index) {
+          // Compute subgraph key from hgids
+          var key = feature.properties.pits
+              .map(function(pit) {return pit.hgid; })
+              .join(",")
+              .hashCode();
 
-  d.geometry.geometries.map(function(geometry, geometryIndex) {
-    var hgid,
-        pitIndex;
-    for (pitIndex = 0; pitIndex < d.properties.pits.length; pitIndex++) {
-      if (d.properties.pits[pitIndex].geometryIndex == geometryIndex) {
-        hgid = d.properties.pits[pitIndex].hgid;
-        break;
+          var boundSelect = this.handleSelect.bind(this, index),
+              boundUpdateOtherConcepts = this.updateOtherConcepts.bind(this, index);
+
+          return React.createElement(ConceptsBoxListItem, {key: key, feature: feature, index: index, 
+              featureGroups: this.props.featureGroups, pitLayers: this.props.pitLayers, 
+              onSelect: boundSelect, ref: 'item' + index, 
+              updateOtherConcepts: boundUpdateOtherConcepts});
+        }.bind(this))
+      )
+    );
+  },
+
+  componentDidMount: function() {
+    fitBounds(this.props.featureGroups.getBounds());
+  },
+
+  componentDidUpdate: function() {
+    fitBounds(this.props.featureGroups.getBounds());
+  }
+});
+
+var ConceptsBoxListItem = React.createClass({displayName: "ConceptsBoxListItem",
+  getInitialState: function() {
+    return {
+      selected: false,
+      unfade: true
+    };
+  },
+
+  render: function() {
+    var feature = this.props.feature,
+        sortedNames = sortNames(feature.properties.pits),
+        selectedName = sortedNames[0].name,
+        selectedNames = sortedNames.slice(0, 4).map(function(name) { return name.name; }),
+        selectedNamesRow;
+
+    if (selectedNames.length > 1) {
+      var namesLengthDiff = sortedNames.length - selectedNames.length,
+          namesPlurSing = namesLengthDiff == 1 ? "name" : "names";
+
+      selectedNamesSuffix = sortedNames.length > selectedNames.length ? " and " + namesLengthDiff + " other " +  namesPlurSing : "";
+
+      selectedNamesRow =  React.createElement("tr", null, 
+          React.createElement("td", {className: "label"}, "Names"), 
+          React.createElement("td", null, 
+            React.createElement("span", null, 
+              selectedNames.map(function(selectedName, index) {
+                return React.createElement("span", {key: index, className: "concept-alt-name"}, selectedName);
+              })
+            ), 
+            React.createElement("span", null, selectedNamesSuffix)
+          )
+        );
+    }
+
+    var sources = feature.properties.pits
+      //.filter(function(pit) { return pit.geometryIndex >= 0; })
+      .map(function(pit) { return pit.source; })
+      .unique();
+
+    // HTML
+    // ----------------------------------------------------------------------
+    var className = "padding concept" + (!this.state.selected &! this.state.unfade ? " faded" : "");
+
+    return (
+      React.createElement("li", {className: className}, 
+        React.createElement("h5", null, 
+          React.createElement("span", null, selectedName), 
+          React.createElement("code", null, feature.properties.type.replace("hg:", ""))
+        ), 
+        React.createElement("table", {className: "indent"}, 
+          React.createElement("tbody", null, 
+            selectedNamesRow, 
+            React.createElement("tr", null, 
+              React.createElement("td", {className: "label"}, "Sources"), 
+              React.createElement("td", null, 
+                React.createElement("span", {className: "source-list"}, 
+                  sources.map(function(source, index) {
+                    return React.createElement("span", {key: index}, React.createElement("code", null, source));
+                  })
+                )
+              )
+            )
+          )
+        ), 
+        React.createElement("div", {className: "buttons"}, 
+          React.createElement("button", {className: "details", onClick: this.details, title: "Show concept's details"}, "Details..."), 
+          React.createElement("button", {className: "zoom", onClick: this.zoom, title: "Zoom and pan map to concept"}, "Zoom"), 
+          React.createElement("button", {className: "select", onClick: this.select, title: "Highlight concept on map (and fade others)"}, "Select")
+        ), 
+        React.createElement("div", {className: "clear"})
+      )
+    );
+  },
+
+  details: function(params) {
+    fitBounds(this.featureGroup.getBounds());
+    document.getElementById("concepts-box").scrollTop = 0;
+
+    this.props.updateOtherConcepts({selected: false, unfade: false, disabled: true});
+    this.setState({selected: true, unfade: false, disabled: false});
+    this.props.onSelect();
+  },
+
+  zoom: function(params) {
+    if (!params.noFitBounds) {
+      fitBounds(this.featureGroup.getBounds());
+    } else {
+      //TODO: fix -60 hack!
+      document.getElementById("concepts-box").scrollTop = React.findDOMNode(this).offsetTop - 60;
+    }
+
+    this.props.updateOtherConcepts({selected: false, unfade: false});
+    this.setState({selected: true, unfade: false});
+  },
+
+  select: function(params) {
+    this.props.updateOtherConcepts({selected: false, unfade: false});
+    this.setState({selected: true, unfade: false});
+  },
+
+  componentDidMount: function() {
+    var _this = this,
+        feature = this.props.feature;
+
+    this.featureGroup = L.featureGroup();
+
+    feature.geometry.geometries.map(function(geometry, geometryIndex) {
+      var hgid,
+          pitIndex;
+      for (pitIndex = 0; pitIndex < feature.properties.pits.length; pitIndex++) {
+        if (feature.properties.pits[pitIndex].geometryIndex == geometryIndex) {
+          hgid = feature.properties.pits[pitIndex].hgid;
+          break;
+        }
+      }
+
+      return {
+        type: "Feature",
+        properties: {
+          geometryIndex: geometryIndex,
+          pitIndex: pitIndex,
+          hgid: hgid
+        },
+        geometry: geometry
+      };
+    }).sort(function(a, b) {
+      return geometryTypeOrder.indexOf(b.geometry.type) - geometryTypeOrder.indexOf(a.geometry.type);
+    })
+    .forEach(function(feature) {
+      var geojson = L.geoJson(feature, {
+        geometryType: feature.geometry.type,
+        style: lineStyle,
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, pointStyle);
+        },
+        onEachFeature: function(feature, layer) {
+          layer.on('click', function (e) {
+            _this.zoom({
+              hgid: feature.hgid,
+              noFitBounds: true
+            });
+          });
+        }
+      });
+      this.featureGroup.addLayer(geojson);
+    }.bind(this));
+
+    this.addLayer();
+  },
+
+  componentDidUpdate: function() {
+    if (this.state.disabled) {
+      this.removeLayer();
+    } else {
+      this.addLayer();
+    }
+
+    this.featureGroup.getLayers().forEach(function(layer) {
+      // TODO: make function for styling based on state
+      // TODO: make selection object in state, denoting all possible selection states
+      if (layer.options.geometryType == "Point") {
+        layer.setStyle(!this.state.selected &! this.state.unfade ? fadedPointStyle : pointStyle);
+      } else {
+        layer.setStyle(!this.state.selected &! this.state.unfade ? fadedLineStyle : lineStyle);
+      }
+    }.bind(this));
+  },
+
+  addLayer: function() {
+    this.props.featureGroups.addLayer(this.featureGroup);
+    this.featureGroup.getLayers().forEach(function(layer) {
+      var hgid = layer.getLayers()[0].feature.properties.hgid;
+      this.props.pitLayers[hgid] = {
+        layer: layer,
+        featureGroup: this.featureGroup
+      };
+    }.bind(this));
+  },
+
+  removeLayer: function() {
+    // Remove item's GeoJSON layer from Leaflet map
+    this.props.featureGroups.removeLayer(this.featureGroup);
+    this.featureGroup.getLayers().forEach(function(layer) {
+      var hgid = layer.getLayers()[0].feature.properties.hgid;
+      delete this.props.pitLayers[hgid];
+    }.bind(this));
+  },
+
+  componentWillUnmount: function() {
+    this.removeLayer();
+  }
+});
+
+/**
+ * Components for single concept
+ */
+
+var ConceptBoxResults = React.createClass({displayName: "ConceptBoxResults",
+  render: function() {
+    var feature = this.props.feature;
+    var sortedNames = sortNames(feature.properties.pits),
+        selectedName = sortedNames[0].name;
+        pitCount = feature.properties.pits.length,
+        message = "Concept contains " + pitCount + " place "
+            + ((pitCount == 1) ? "name" : "names");
+
+    return (
+      React.createElement("div", null, 
+        React.createElement("div", {id: "pits-results", className: "padding results"}, 
+          "1 concept selected:", 
+          React.createElement("a", {id: "pits-close", className: "float-right", href: "#", onClick: this.props.back}, "Back to concept list")
+        ), 
+        React.createElement("div", {id: "pits-header", className: "padding"}, 
+          React.createElement("h5", null, selectedName, React.createElement("code", null, this.props.feature.properties.type.replace("hg:", ""))), 
+          React.createElement("div", {className: "cell-padding"}, 
+            message, 
+            React.createElement("a", {id: "show-graph", className: "float-right", href: "#", onClick: this.showGraph}, this.props.graphHidden ? "Show graph" : "Hide graph")
+          )
+        )
+      )
+    );
+  },
+
+  showGraph: function() {
+    this.props.showGraph();
+  }
+});
+
+var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
+  getInitialState: function() {
+    var sortFields = [
+          "# relations",
+          "name",
+          "period",
+          "source"
+        ],
+        sources = this.props.feature.properties.pits
+          .map(function(pit) { return pit.source; })
+          .unique()
+          .reduce(function(o, v) {
+            o[v] = true;
+            return o;
+          }, {});
+
+    return {
+      loop: {
+        index: -1,
+        timer: null,
+        delay: 800
+      },
+      filters: {
+        sources: sources,
+        name: /.*/
+      },
+      sortField: sortFields[0],
+      sortFields: sortFields
+    };
+  },
+
+  render: function() {
+    var sources = this.props.feature.properties.pits
+            .map(function(pit) { return pit.source; })
+            .unique()
+        filteredPits = this.props.feature.properties.pits
+            .filter(function(pit) {
+              return this.state.filters.name.test(pit.name.toLowerCase()) && this.state.filters.sources[pit.source];
+            }.bind(this));
+
+    if (this.state.sortField != this.state.sortFields[0]) {
+      filteredPits.sort(function(a, b) {
+        if (this.state.sortField == "name") {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        } else if (this.state.sortField == "period") {
+          var dateA = a.startDate || a.endDate,
+              dateB = b.startDate || b.endDate;
+
+          // http://stackoverflow.com/questions/11526504/minimum-and-maximum-date
+          if (!dateA) dateA = 8640000000000000;
+          if (!dateB) dateB = 8640000000000000;
+
+          return (new Date(dateA)) - (new Date(dateB));
+        } else if (this.state.sortField == "source") {
+          return a.source.localeCompare(b.source);
+        }
+      }.bind(this));
+    }
+
+    var geometryCount = filteredPits.filter(function(pit) {
+      return pit.geometryIndex > -1;
+    }).length;
+
+    filteredPits = filteredPits.map(function(pit, index) {
+      var boundUpdateOtherPits = this.updateOtherPits.bind(this, index);
+      return React.createElement(Pit, {key: pit.hgid, pit: pit, feature: this.props.feature, index: index, 
+          featureGroups: this.props.featureGroups, pitLayers: this.props.pitLayers, 
+          ref: 'item' + index, updateOtherPits: boundUpdateOtherPits});
+    }.bind(this));
+
+    var filterMessage;
+    if (filteredPits.length > 0) {
+      var loopMessage = this.state.loop.timer ? "Stop" : "Loop";
+      filterMessage = React.createElement("span", null, 
+          "Showing ", filteredPits.length, " place ", filteredPits.length == 1 ? "name" : "names", " (", geometryCount, " on map):", 
+          React.createElement("a", {id: "loop-pits", className: "float-right", href: "#", onClick: this.toggleLoop}, 
+            loopMessage, 
+          React.createElement("img", {src: "images/rocket.png", height: "18px"}))
+          );
+    } else {
+      filterMessage = React.createElement("span", null, "No place names matching your filter");
+    }
+
+    var firstHgid = this.props.feature.properties.pits[0].hgid,
+        apiUrl = getApiUrl(firstHgid),
+        links = {
+          histograph: apiUrl,
+          jsonld: "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl,
+          geojson: "http://geojson.io/#data=data:text/x-url," + encodeURIComponent(apiUrl)
+        };
+
+    return (
+      React.createElement("div", null, 
+        React.createElement("div", {className: "padding"}, 
+          React.createElement("table", {className: "indent"}, 
+            React.createElement("tbody", null, 
+              React.createElement("tr", null, 
+                React.createElement("td", null, "Data"), 
+                React.createElement("td", null, 
+                  React.createElement("a", {href: links['histograph']}, "API"), ", ", React.createElement("a", {href: links['jsonld']}, "JSON-LD Playground"), ", ", React.createElement("a", {href: links['geojson']}, "geojson.io")
+                )
+              ), 
+              React.createElement("tr", null, 
+                React.createElement("td", {className: "label"}, "Names"), 
+                React.createElement("td", null, 
+                  React.createElement("input", {type: "search", placeholder: "Filter names", id: "pit-name-filter", onChange: this.filterName})
+                )
+              ), 
+              React.createElement("tr", null, 
+                React.createElement("td", {className: "label"}, "Sources"), 
+                React.createElement("td", null, 
+                  React.createElement("span", {className: "source-list"}, 
+                    sources.map(function(source, index) {
+                      var boundFilterSource = this.filterSource.bind(this, source),
+                          className = this.state.filters.sources[source] ? "" : "filtered";
+                      return React.createElement("span", {key: source}, React.createElement("a", {className: className, href: "#", 
+                                onClick: boundFilterSource}, React.createElement("code", null, source)), " ");
+                    }.bind(this))
+                  )
+                )
+              ), 
+              React.createElement("tr", null, 
+                React.createElement("td", {className: "label"}, "Sort"), 
+                React.createElement("td", {className: "sort-fields"}, 
+                  this.state.sortFields.map(function(field, index) {
+                    var boundSort = this.sort.bind(this, field),
+                        className = this.state.sortField === field ? "selected" : "";
+                    return React.createElement("span", {key: field}, React.createElement("a", {className: className, href: "#", onClick: boundSort}, field));
+                  }.bind(this))
+                )
+              )
+            )
+          ), 
+          React.createElement("p", null, 
+            filterMessage
+          )
+        ), 
+        React.createElement("ol", {id: "pits", className: "list"}, 
+          filteredPits
+        )
+      )
+    );
+  },
+
+  updateOtherPits: function(callingIndex, state) {
+    for (var ref in this.refs) {
+      var item = this.refs[ref];
+      if (callingIndex != item.props.index) {
+        // TODO: setstate? or item.state = ?
+        item.setState(state);
+      }
+    }
+  },
+
+  sort: function(field) {
+    this.state.sortField = field;
+    this.forceUpdate();
+  },
+
+  toggleLoop: function() {
+    if (!this.state.loop.timer) {
+      this.state.loop.timer = setTimeout(this.loopStep, this.state.loop.delay);
+    } else {
+      clearTimeout(this.state.loop.timer);
+      this.state.loop.index = -1;
+      this.state.loop.timer = undefined;
+    }
+    this.forceUpdate();
+  },
+
+  loopStep: function() {
+    var length = Object.keys(this.refs).length,
+        newIndex = length == 0 ? 0 : (this.state.loop.index + 1) % length;
+
+    this.state.loop.index = newIndex;
+
+    for (var ref in this.refs) {
+      var item = this.refs[ref];
+      if (this.state.loop.index == item.props.index) {
+        item.state.selected = true;
+        item.state.unfade = false;
+      } else {
+        item.state.selected = false;
+        item.state.unfade = false;
       }
     }
 
-    return {
-      type: "Feature",
-      properties: {
-        conceptIndex: conceptIndex,
-        geometryIndex: geometryIndex,
-        pitIndex: pitIndex,
-        hgid: hgid
-      },
-      geometry: geometry
-    };
-  }).sort(function(a, b) {
-    return geometryTypeOrder.indexOf(b.geometry.type) - geometryTypeOrder.indexOf(a.geometry.type);
-  })
-  .forEach(function(feature) {
-    geojsonLayer.addData(feature);
-  });
+    this.state.loop.timer = setTimeout(this.loopStep, this.state.loop.delay);
+    this.forceUpdate();
+  },
 
-  //
-  //
-  // lijstje met bronnen waar je op kunt klikken (alleen met geo!)
-  // jaartallen
-}
+  filterName: function(e) {
+    var value = document.getElementById("pit-name-filter").value.toLowerCase();
+    this.state.filters.name = new RegExp(".*" + value + ".*");
+    this.forceUpdate();
+  },
 
-function selectConcept(conceptIndex, pitIndex) {
-  d3.selectAll("ol#concepts li.concept")
-      .classed("pb-pattern o-lines-light", function(d, i) {
-        return i == conceptIndex;
-      });
+  filterSource: function(source, event) {
+    if (event.shiftKey) {
+      var current = this.state.filters.sources[source];
 
-  map.fitBounds(geojsonLayers.getLayer(geojsonLayerIds[conceptIndex]).getBounds());
-}
+      var count = 0;
+      for (s in this.state.filters.sources) {
+        count += this.state.filters.sources[s] ? 1 : 0;
+      }
 
-function createConceptList(geojson) {
-  geojsonLayers.clearLayers();
-  geojsonLayerIds = [];
+      var length = Object.keys(this.state.filters.sources).length;
+      if (length == count) {
+        current = !current;
+      }
 
-  d3.select("#concepts").selectAll("li.concept").remove();
-
-  if (geojson && geojson.features && geojson.features.length > 0) {
-    d3.select("#concepts").selectAll("li.concept")
-        .data(geojson.features)
-        .enter()
-      .append("li")
-        .attr("class", "padding concept")
-        .each(createConceptListItem);
-
-    d3.select("#concepts-count").html(geojson.features.length);
-    d3.select("#concepts-concepts").html(geojson.features.length == 1 ? "concept" : "concepts");
-    d3.select("#concepts-box").classed("hidden", false);
-  } else {
-    // TODO: refactor, create function
-    d3.select("#concepts-box").classed("hidden", true);
-  }
-}
-
-function getData(type, query) {
-  d3.select("#pits-box").classed("hidden", true);
-  var url = endpoint + "search?" + type + "=" + query;
-  d3.json(url, function(data) {
-    geojson = data;
-    createConceptList(geojson);
-    map.fitBounds(geojsonLayers.getBounds());
-    setHash(type + "=" + query);
-  });
-}
-
-function parseHash(hash) {
-  params = {};
-  hash.split("&").forEach(function(param) {
-    if (param.indexOf("=") > -1) {
-      var kv = param.split("=");
-      params[kv[0]] = kv[1];
+      for (s in this.state.filters.sources) {
+        this.state.filters.sources[s] = current;
+      }
+      this.state.filters.sources[source] = !current;
+    } else {
+      this.state.filters.sources[source] = !this.state.filters.sources[source];
     }
-  });
 
-  if (params.uri) {
-    d3.select("#search-input").property('value', params.uri);
-    getData('uri', params.uri);
-  } else if (params.hgid) {
-    d3.select("#search-input").property('value', params.hgid);
-    getData('hgid', params.hgid);
-  } else if (params.name) {
-    d3.select("#name-input").property('value', params.name);
-    getData('name', params.name);
+    event.preventDefault();
+    this.forceUpdate();
   }
-}
 
-function setHash(hash) {
-  disableHashChange = true;
-  location.hash = hash;
-  setTimeout(function(){
-    disableHashChange = false;
-  }, 1000);
-}
+});
 
-window.onhashchange = function() {
-  if (!disableHashChange) {
-    parseHash(location.hash.substring(1))
+var Pit = React.createClass({displayName: "Pit",
+  getInitialState: function() {
+    return {
+      selected: false,
+      unfade: true
+    };
+  },
+
+  render: function() {
+    var pit = this.props.pit,
+        uriRow,
+        geometryRow,
+        periodRow,
+        geometrySpan,
+        buttons;
+
+    if (pit.uri) {
+      uriRow = (React.createElement("tr", null, React.createElement("td", {className: "label"}, "URI"), React.createElement("td", null, React.createElement("a", {href: pit.uri}, pit.uri))));
+    }
+
+    if (pit.geometryIndex > -1) {
+      geometryRow = (React.createElement("tr", null, React.createElement("td", {className: "label"}, "Geometry"), React.createElement("td", null, "Jaatjes")));
+    }
+
+    if (pit.startDate || pit.endDate) {
+      var period;
+      if (pit.startDate && pit.endDate) {
+        period = pit.startDate + " - " + pit.endDate;
+      } else if (pit.startDate) {
+        period = "from " + pit.startDate;
+      } else if (pit.endDate) {
+        period = "until " + pit.endDate;
+      }
+      periodRow = (React.createElement("tr", null, React.createElement("td", {className: "label"}, "Period"), React.createElement("td", null, period)));
+    }
+
+    if (pit.geometryIndex > -1) {
+      var className = "float-right geometry-type ",
+          geometryType = this.props.feature.geometry.geometries[pit.geometryIndex].type;
+
+      if (geometryType === "Point" || geometryType === "MultiPoint") {
+        className += "geometry-type-point";
+      } else if (geometryType === "LineString" || geometryType === "MultiLineString") {
+        className += "geometry-type-line";
+      } else if (geometryType === "Polygon" || geometryType === "MultiPolygon") {
+        className += "geometry-type-polygon";
+      }
+      geometrySpan = (React.createElement("span", {className: className}));
+
+      buttons = (
+        React.createElement("div", {className: "buttons"}, 
+          React.createElement("button", {className: "zoom", onClick: this.zoom, title: "Zoom and pan map to place name"}, "Zoom"), 
+          React.createElement("button", {className: "select", onClick: this.select, title: "Select place name (and fade others)"}, "Select")
+        )
+      );
+    }
+
+    var className = "padding pit" + (!this.state.selected &! this.state.unfade ? " faded" : "");
+
+    return (
+      React.createElement("li", {className: className}, 
+        React.createElement("h6", null, pit.name, geometrySpan), 
+        React.createElement("div", null, 
+          React.createElement("table", null, 
+            React.createElement("tbody", null, 
+              React.createElement("tr", null, 
+                React.createElement("td", {className: "label"}, "ID"), 
+                React.createElement("td", null, React.createElement("code", null, pit.hgid))
+              ), 
+              uriRow, 
+              periodRow
+            )
+          ), 
+          buttons, 
+          React.createElement("div", {className: "clear"})
+        )
+      )
+    );
+  },
+
+
+
+
+  zoom: function(params) {
+    if (!params.noFitBounds) {
+      console.log("Zoom naar PIT (maak functie)")
+      // Ja, nu dus terug naar dinges, en dan conceptlijst in
+      //fitBounds(this.featureGroup.getBounds());
+    } else {
+      //TODO: fix -60 hack!
+      document.getElementById("concepts-box").scrollTop = React.findDOMNode(this).offsetTop - 60;
+    }
+
+    this.props.updateOtherPits({selected: false, unfade: false});
+    this.setState({selected: true, unfade: false});
+  },
+
+  select: function(params) {
+    this.props.updateOtherPits({selected: false, unfade: false});
+    this.setState({selected: true, unfade: false});
+  },
+
+  componentDidUpdate: function() {
+    if (this.props.pit.geometryIndex > -1) {
+      var pitLayer = this.props.pitLayers[this.props.pit.hgid],
+          layer = pitLayer.layer;
+
+
+
+      if (layer.options.geometryType == "Point") {
+        layer.setStyle(!this.state.selected &! this.state.unfade ? faded2PointStyle : pointStyle);
+      } else {
+        layer.setStyle(!this.state.selected &! this.state.unfade ? faded2LineStyle : lineStyle);
+      }
+    }
   }
-};
 
-if (location.hash) {
-  parseHash(location.hash.substring(1));
-}
+
+
+
+});
+
+var Graph = React.createClass({displayName: "Graph",
+  render: function() {
+    if (this.props.graphHidden) {
+      return null;
+    } else {
+      return (
+        React.createElement("div", {id: "graph-container", className: "box-container"}, 
+          React.createElement("div", {className: "box-container-padding"}, 
+            React.createElement("div", {id: "graph-box", className: "box"}, 
+              React.createElement("svg", {id: "graph"})
+            )
+          )
+        )
+      );
+    }
+  },
+
+  componentDidUpdate: function() {
+    // #graph has fixed position, z-index does not work...
+    d3.select("#map .leaflet-control-container").classed("hidden", !this.props.graphHidden);
+
+    var graphContainer = document.querySelectorAll("#graph-container > div");
+    d3.select("#graph")
+        .datum(this.props.feature)
+        .call(graph().width(graphContainer.offsetWidth).height(graphContainer.offsetHeight));
+  }
+});
+
+// TODO: map element as props, svg element as props
+var resultsBox = React.render(
+  React.createElement(ResultsBox, null),
+  document.getElementById('concepts-box')
+);

@@ -1,6 +1,8 @@
 ---
 ---
 
+var disableHashChange = false;
+
 Array.prototype.unique = function() {
 	var n = {},
       r=[];
@@ -64,4 +66,71 @@ function getApiUrl(queryString) {
 
   return url + params.join("&");
 
+}
+
+function parseHash(hash) {
+  params = {};
+  hash.split("&").forEach(function(param) {
+    if (param.indexOf("=") > -1) {
+      var kv = param.split("=");
+      params[kv[0]] = kv[1];
+    }
+  });
+
+  if (params.search) {
+    d3.select("#search-input").property('value', params.search);
+    getData(params.search);
+  }
+}
+
+function setHash(hash) {
+  disableHashChange = true;
+  location.hash = hash;
+  setTimeout(function(){
+    disableHashChange = false;
+  }, 1000);
+}
+
+window.onhashchange = function() {
+  if (!disableHashChange) {
+    parseHash(location.hash.substring(1))
+  }
+};
+
+if (location.hash) {
+  parseHash(location.hash.substring(1));
+}
+
+
+/**
+ * D3.js - GeoJSON from Histograph API
+ */
+
+d3.selectAll("#search-input").on('keyup', function() {
+  if (d3.event.keyCode == 13) {
+    var value = d3.select(this).property('value');
+    setHash("search=" + value);
+    getData(value);
+  }
+});
+
+function getData(query) {
+  d3.json(getApiUrl(query), function(error, geojson) {
+    var errorMessage = null;
+    if (error) {
+      try {
+        errorMessage = JSON.parse(error.response).error;
+      } catch (e) {
+        errorMessage = "Invalid reponse from Histograph API";
+      }
+    }
+    document.getElementById("concepts-box").scrollTop = 0;
+    resultsBox.setProps({
+      geojson: geojson,
+      error: errorMessage,
+      selected: -1,
+      hidden: false
+    });
+
+  });
 }

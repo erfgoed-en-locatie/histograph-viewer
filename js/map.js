@@ -12,6 +12,7 @@ var map = L.map('map', {
 
     pointStyle = {
       color: color,
+      stroke: true,
       fillColor: color,
       fill: true,
       radius: 9,
@@ -20,24 +21,39 @@ var map = L.map('map', {
 
     fadedPointStyle = {
       color: color,
+      stroke: true,
       fillColor: color,
       fill: true,
       radius: 7,
       opacity: 0.25
     },
 
+    faded2PointStyle = {
+      stroke: false,
+      fill: false
+    },
+
     lineStyle = {
       color: color,
-      fill: false,
+      fill: true,
+      stroke: true,
       weight: 3,
-      opacity: 0.95
+      opacity: 0.95,
+      fillOpacity: 0.05
     },
 
     fadedLineStyle = {
       color: color,
-      fill: false,
+      fill: true,
+      stroke: true,
       weight: 2,
-      opacity: 0.25
+      opacity: 0.25,
+      fillOpacity: 0
+    },
+
+    faded2LineStyle = {
+      stroke: false,
+      fill: false
     },
 
     tileLayer = L.tileLayer(tileUrl, {
@@ -45,17 +61,12 @@ var map = L.map('map', {
       attribution: attribution,
       opacity: 1
     }).addTo(map),
-    featureGroups = L.featureGroup().addTo(map),
     geometryTypeOrder = [
       "Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"
     ];
 
 map.zoomControl.setPosition('topright');
 map.setView([52.2808, 5.4918], 9);
-
-function fitMapBounds() {
-  fitBounds(featureGroups.getBounds());
-}
 
 function fitBounds(bounds) {
   var width = document.getElementById("sidebar-container").offsetWidth;

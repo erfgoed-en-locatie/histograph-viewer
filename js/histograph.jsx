@@ -5,6 +5,8 @@ var ResultsBox = React.createClass({
   getInitialState: function() {
     return {
       graphHidden: true,
+      featureGroups: L.featureGroup().addTo(map),
+      pitLayers: {}
     };
   },
 
@@ -22,7 +24,8 @@ var ResultsBox = React.createClass({
       var conceptBox = (
         <div>
           <ConceptBoxResults feature={feature} back={this.handleBack} showGraph={this.showGraph} graphHidden={this.state.graphHidden}/>
-          <ConceptBoxList feature={feature}/>
+          <ConceptBoxList feature={feature} featureGroups={this.state.featureGroups}
+              pitLayers={this.state.pitLayers}/>
           <Graph feature={feature} graphHidden={this.state.graphHidden}/>
         </div>
       );
@@ -35,7 +38,8 @@ var ResultsBox = React.createClass({
         <div>
           <div className={className}>
             <ConceptsBoxResults features={this.props.geojson.features} hide={this.handleHide}/>
-            <ConceptsBoxList features={this.props.geojson.features} onSelect={this.handleSelect}/>
+            <ConceptsBoxList features={this.props.geojson.features} featureGroups={this.state.featureGroups}
+                pitLayers={this.state.pitLayers} onSelect={this.handleSelect}/>
           </div>
           {conceptBox}
         </div>
@@ -85,7 +89,7 @@ var ConceptsBoxResults = React.createClass({
     } else if (this.props.error) {
       message = "Error: " + this.props.error;
     } else {
-      message = "No subgraphs found";
+      message = "No concepts found";
     }
 
     return (
@@ -126,6 +130,7 @@ var ConceptsBoxList = React.createClass({
               boundUpdateOtherConcepts = this.updateOtherConcepts.bind(this, index);
 
           return <ConceptsBoxListItem key={key} feature={feature} index={index}
+              featureGroups={this.props.featureGroups} pitLayers={this.props.pitLayers}
               onSelect={boundSelect} ref={'item' + index}
               updateOtherConcepts={boundUpdateOtherConcepts}/>;
         }.bind(this))}
@@ -134,11 +139,11 @@ var ConceptsBoxList = React.createClass({
   },
 
   componentDidMount: function() {
-    fitMapBounds();
+    fitBounds(this.props.featureGroups.getBounds());
   },
 
   componentDidUpdate: function() {
-    fitMapBounds();
+    fitBounds(this.props.featureGroups.getBounds());
   }
 });
 
@@ -285,21 +290,23 @@ var ConceptsBoxListItem = React.createClass({
             });
           });
         }
-      }).addTo(map);
+      });
       this.featureGroup.addLayer(geojson);
     }.bind(this));
 
-    featureGroups.addLayer(this.featureGroup);
+    this.addLayer();
   },
 
   componentDidUpdate: function() {
     if (this.state.disabled) {
-      featureGroups.removeLayer(this.featureGroup);
+      this.removeLayer();
     } else {
-      featureGroups.addLayer(this.featureGroup);
+      this.addLayer();
     }
 
     this.featureGroup.getLayers().forEach(function(layer) {
+      // TODO: make function for styling based on state
+      // TODO: make selection object in state, denoting all possible selection states
       if (layer.options.geometryType == "Point") {
         layer.setStyle(!this.state.selected &! this.state.unfade ? fadedPointStyle : pointStyle);
       } else {
@@ -308,9 +315,28 @@ var ConceptsBoxListItem = React.createClass({
     }.bind(this));
   },
 
-  componentWillUnmount: function() {
+  addLayer: function() {
+    this.props.featureGroups.addLayer(this.featureGroup);
+    this.featureGroup.getLayers().forEach(function(layer) {
+      var hgid = layer.getLayers()[0].feature.properties.hgid;
+      this.props.pitLayers[hgid] = {
+        layer: layer,
+        featureGroup: this.featureGroup
+      };
+    }.bind(this));
+  },
+
+  removeLayer: function() {
     // Remove item's GeoJSON layer from Leaflet map
-    featureGroups.removeLayer(this.featureGroup);
+    this.props.featureGroups.removeLayer(this.featureGroup);
+    this.featureGroup.getLayers().forEach(function(layer) {
+      var hgid = layer.getLayers()[0].feature.properties.hgid;
+      delete this.props.pitLayers[hgid];
+    }.bind(this));
+  },
+
+  componentWillUnmount: function() {
+    this.removeLayer();
   }
 });
 
@@ -366,6 +392,11 @@ var ConceptBoxList = React.createClass({
           }, {});
 
     return {
+      loop: {
+        index: -1,
+        timer: null,
+        delay: 800
+      },
       filters: {
         sources: sources,
         name: /.*/
@@ -373,15 +404,6 @@ var ConceptBoxList = React.createClass({
       sortField: sortFields[0],
       sortFields: sortFields
     };
-  },
-
-  updateOtherPits: function(callingIndex, state) {
-    for (var ref in this.refs) {
-      var item = this.refs[ref];
-      if (callingIndex != item.props.index) {
-        item.setState(state);
-      }
-    }
   },
 
   render: function() {
@@ -418,25 +440,43 @@ var ConceptBoxList = React.createClass({
 
     filteredPits = filteredPits.map(function(pit, index) {
       var boundUpdateOtherPits = this.updateOtherPits.bind(this, index);
-      return <Pit key={pit.hgid} pit={pit} feature={this.props.feature}
+      return <Pit key={pit.hgid} pit={pit} feature={this.props.feature} index={index}
+          featureGroups={this.props.featureGroups} pitLayers={this.props.pitLayers}
           ref={'item' + index} updateOtherPits={boundUpdateOtherPits}/>;
     }.bind(this));
 
     var filterMessage;
     if (filteredPits.length > 0) {
+      var loopMessage = this.state.loop.timer ? "Stop" : "Loop";
       filterMessage = <span>
           Showing {filteredPits.length} place {filteredPits.length == 1 ? "name" : "names"} ({geometryCount} on map):
-          <a id="loop-pits" className="float-right" href="#" onClick={this.loop}>Loop <img src="images/rocket.png" height="18px"/></a>
+          <a id="loop-pits" className="float-right" href="#" onClick={this.toggleLoop}>
+            {loopMessage}
+          <img src="images/rocket.png" height="18px"/></a>
           </span>;
     } else {
       filterMessage = <span>No place names matching your filter</span>;
     }
+
+    var firstHgid = this.props.feature.properties.pits[0].hgid,
+        apiUrl = getApiUrl(firstHgid),
+        links = {
+          histograph: apiUrl,
+          jsonld: "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl,
+          geojson: "http://geojson.io/#data=data:text/x-url," + encodeURIComponent(apiUrl)
+        };
 
     return (
       <div>
         <div className="padding">
           <table className="indent">
             <tbody>
+              <tr>
+                <td>Data</td>
+                <td>
+                  <a href={links['histograph']}>API</a>, <a href={links['jsonld']}>JSON-LD Playground</a>, <a href={links['geojson']}>geojson.io</a>
+                </td>
+              </tr>
               <tr>
                 <td className="label">Names</td>
                 <td>
@@ -479,13 +519,51 @@ var ConceptBoxList = React.createClass({
     );
   },
 
+  updateOtherPits: function(callingIndex, state) {
+    for (var ref in this.refs) {
+      var item = this.refs[ref];
+      if (callingIndex != item.props.index) {
+        // TODO: setstate? or item.state = ?
+        item.setState(state);
+      }
+    }
+  },
+
   sort: function(field) {
     this.state.sortField = field;
     this.forceUpdate();
   },
 
-  loop: function() {
+  toggleLoop: function() {
+    if (!this.state.loop.timer) {
+      this.state.loop.timer = setTimeout(this.loopStep, this.state.loop.delay);
+    } else {
+      clearTimeout(this.state.loop.timer);
+      this.state.loop.index = -1;
+      this.state.loop.timer = undefined;
+    }
+    this.forceUpdate();
+  },
 
+  loopStep: function() {
+    var length = Object.keys(this.refs).length,
+        newIndex = length == 0 ? 0 : (this.state.loop.index + 1) % length;
+
+    this.state.loop.index = newIndex;
+
+    for (var ref in this.refs) {
+      var item = this.refs[ref];
+      if (this.state.loop.index == item.props.index) {
+        item.state.selected = true;
+        item.state.unfade = false;
+      } else {
+        item.state.selected = false;
+        item.state.unfade = false;
+      }
+    }
+
+    this.state.loop.timer = setTimeout(this.loopStep, this.state.loop.delay);
+    this.forceUpdate();
   },
 
   filterName: function(e) {
@@ -519,6 +597,7 @@ var ConceptBoxList = React.createClass({
     event.preventDefault();
     this.forceUpdate();
   }
+
 });
 
 var Pit = React.createClass({
@@ -587,7 +666,7 @@ var Pit = React.createClass({
           <table>
             <tbody>
               <tr>
-                <td className="label">hgid</td>
+                <td className="label">ID</td>
                 <td><code>{pit.hgid}</code></td>
               </tr>
               {uriRow}
@@ -623,6 +702,23 @@ var Pit = React.createClass({
     this.setState({selected: true, unfade: false});
   },
 
+  componentDidUpdate: function() {
+    if (this.props.pit.geometryIndex > -1) {
+      var pitLayer = this.props.pitLayers[this.props.pit.hgid],
+          layer = pitLayer.layer;
+
+
+
+      if (layer.options.geometryType == "Point") {
+        layer.setStyle(!this.state.selected &! this.state.unfade ? faded2PointStyle : pointStyle);
+      } else {
+        layer.setStyle(!this.state.selected &! this.state.unfade ? faded2LineStyle : lineStyle);
+      }
+    }
+  }
+
+
+
 
 });
 
@@ -647,40 +743,14 @@ var Graph = React.createClass({
     // #graph has fixed position, z-index does not work...
     d3.select("#map .leaflet-control-container").classed("hidden", !this.props.graphHidden);
 
+    var graphContainer = document.querySelectorAll("#graph-container > div");
     d3.select("#graph")
         .datum(this.props.feature)
-        .call(graph());
+        .call(graph().width(graphContainer.offsetWidth).height(graphContainer.offsetHeight));
   }
 });
 
-/**
- * D3.js - GeoJSON from Histograph API
- */
-
-d3.selectAll("#search-input").on('keyup', function() {
-  if (d3.event.keyCode == 13) {
-    var value = d3.select(this).property('value');
-    d3.json(getApiUrl(value), function(error, geojson) {
-      var errorMessage = null;
-      if (error) {
-        try {
-          errorMessage = JSON.parse(error.response).error;
-        } catch (e) {
-          errorMessage = "Invalid reponse from Histograph API";
-        }
-      }
-      document.getElementById("concepts-box").scrollTop = 0;
-      resultsBox.setProps({
-        geojson: geojson,
-        error: errorMessage,
-        selected: -1,
-        hidden: false
-      });
-
-    });
-  }
-});
-
+// TODO: map element as props, svg element as props
 var resultsBox = React.render(
   <ResultsBox />,
   document.getElementById('concepts-box')

@@ -1,11 +1,29 @@
 function graph() {
+  var events = d3.dispatch('click', 'click'),
+      svgGroups = [
+        "link",
+        "circle",
+        "text",
+        "label"
+      ];
 
-  events = d3.dispatch('click', 'click');
-
-  function graph(selection) {
+  function chips(selection) {
+    var width = 400,
+        height = 400;
 
     selection.each(function() {
-      var feature = d3.select(this).datum(),
+      var groups = selection.selectAll("g")
+              .data(svgGroups)
+              .enter()
+            .append("g")
+              .attr("class", function(d) {
+                return d;
+              }),
+          feature = d3.select(this).datum(),
+          linkG = selection.select("." + svgGroups[0]),
+          circleG = selection.select("." + svgGroups[1]),
+          textG = selection.select("." + svgGroups[2]),
+          labelG = selection.select("." + svgGroups[3]),
           createNode = function(pit) {
             return {
               name: pit.name,
@@ -14,8 +32,8 @@ function graph() {
               startDate: pit.startDate,
               endDate: pit.endDate,
               geometryIndex: pit.geometryIndex,
-              x: 800 / 2,
-              y: 800 / 2,
+              x: 0,
+              y: 0,
               outgoing: [],
               incoming: []
             };
@@ -23,23 +41,134 @@ function graph() {
           nodes = {};
           links = {};
 
+
+      // First, create D3 nodes from all PITs
       feature.properties.pits.forEach(function(pit) {
         nodes[pit.hgid] = createNode(pit);
       });
 
-      feature.properties.relations.forEach(function(relation) {
-        var source = nodes[relation.from],
-            target = nodes[relation.to];
+      // Then create links from each PIT's relations
+      feature.properties.pits.forEach(function(pit) {
+        var source = nodes[pit.hgid];
 
-        nodes[relation.from].outgoing.push(target);
-        nodes[relation.to].incoming.push(source);
+        if (pit.relations) {
+          Object.keys(pit.relations).forEach(function(relation) {
+            if (relation !== "@id") {
+              pit.relations[relation].forEach(function(id) {
+                var hgid = id["@id"],
+                    target = nodes[hgid];
 
-        links[relation.from + "-" + relation.to] = {
-          source: source,
-          target: target,
-          label: "hg:conceptIdentical"
-        };
+                nodes[pit.hgid].outgoing.push(target);
+                nodes[hgid].incoming.push(source);
+
+                links[pit.hgid + "-" + hgid] = {
+                  source: source,
+                  target: target,
+                  label: relation
+                };
+              });
+            }
+          });
+        }
       });
+
+      var transform = function(d) {
+        return "translate(" + d.x + "," + d.y + ")";
+      };
+
+
+      var tick = function () {
+        circle.attr("transform", transform);
+        text.attr("transform", transform);
+        link.attr("d", function(d) {
+          return "M" + d.source.x + "," + d.source.y + " "
+              + "L" + d.target.x + "," + d.target.y;
+        });
+
+        //label.attr("xlink:href", function(d, i) { return "#path" + i; });
+      };
+
+
+      var circle,
+          text,
+          link,
+          label;
+
+      var circleRadius = 5,
+          force = cola.d3adaptor()
+          //.jaccardLinkLengths(60,0.7)
+          //.linkDistance(50)
+          .symmetricDiffLinkLengths(90)
+
+          .start(30, 30)
+          .on("tick", tick)
+          .size([
+            800,
+            800
+          ]);
+
+
+
+        force.nodes(d3.values(nodes))
+             .links(d3.values(links));
+
+        link = linkG.selectAll("path")
+            .data(force.links(), function(d) { return d.source.hgid + "-" + d.target.hgid; });
+
+        link.enter().append("path")
+            .attr("d", function(d) {
+              return "M" + d.source.x + "," + d.source.y + " "
+                  + "L" + d.target.x + "," + d.target.y;
+            })
+            .attr("id", function(d, i) { return "path" + i; });
+        link.exit().remove();
+
+        // // Relation labels
+        // label = labelG.selectAll("text")
+        //     .data(force.links(), function(d) { return d.source.hgid + "-" + d.target.hgid; });
+        //
+        // label.enter().append("text")
+        //     .style("width", "100%")
+        //     .style("text-anchor", "middle")
+        //     .style("padding", "3px")
+        //     .style("background-color", "white")
+        //     .attr("dy", "-4px")
+        //   .append("textPath")
+        //     .attr("xlink:href", function(d, i) { return "#path" + i; })
+        //     .attr("startOffset", "50%")
+        //     .html(function(d) { return d.label; });
+        // label.exit().remove();
+
+        circle = circleG.selectAll("circle")
+            .data(force.nodes(), function(d) { return d.hgid;});
+
+        circle.enter().append("circle")
+            .attr("transform", transform)
+            .attr("r", circleRadius)
+            .attr("class", "graph-pit")
+            .classed("has-geometry", function(d) {
+              return d.geometryIndex > -1;
+            })
+            //.on("click", vertexClick)
+            .call(force.drag);
+        circle.exit().remove();
+
+        text = textG.selectAll("text")
+            .data(force.nodes(), function(d) { return d.hgid;});
+
+        text.enter().append("text")
+            .attr("x", "12px")
+            .attr("y", "12px")
+            .text(function(d) { return d.name; });
+        text.exit().remove();
+
+        force.start();
+
+
+
+
+
+
 
 
 
@@ -235,7 +364,19 @@ function graph() {
   //   force.start();
   // }
 
-  var bound = d3.rebind(graph, events, 'on');
+  chips.width = function(_) {
+    if (!arguments.length) return width;
+    width = _;
+    return chips;
+  }
+
+  chips.height = function(_) {
+    if (!arguments.length) return height;
+    height = _;
+    return chips;
+  }
+
+  var bound = d3.rebind(chips, events, 'on');
 
   return bound;
 }
