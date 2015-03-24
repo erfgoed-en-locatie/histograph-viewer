@@ -485,10 +485,10 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
 
     var filterMessage;
     if (filteredPits.length > 0) {
-      var loopMessage = this.state.loop.timer ? "Stop" : "Loop";
+      var loopMessage = this.state.loop.timer ? "Stop " : "Timelapse ";
       filterMessage = React.createElement("span", null, 
           "Showing ", filteredPits.length, " place ", filteredPits.length == 1 ? "name" : "names", " (", geometryCount, " on map):", 
-          React.createElement("a", {id: "loop-pits", className: "float-right", href: "#", onClick: this.toggleLoop}, 
+          React.createElement("a", {title: "Start timelapse - loop selected place names", id: "loop-pits", className: "float-right", href: "#", onClick: this.toggleLoop}, 
             loopMessage, 
           React.createElement("img", {src: "images/rocket.png", height: "18px"}))
           );

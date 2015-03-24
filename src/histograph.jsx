@@ -485,10 +485,10 @@ var ConceptBoxList = React.createClass({
 
     var filterMessage;
     if (filteredPits.length > 0) {
-      var loopMessage = this.state.loop.timer ? "Stop" : "Loop";
+      var loopMessage = this.state.loop.timer ? "Stop " : "Timelapse ";
       filterMessage = <span>
           Showing {filteredPits.length} place {filteredPits.length == 1 ? "name" : "names"} ({geometryCount} on map):
-          <a id="loop-pits" className="float-right" href="#" onClick={this.toggleLoop}>
+          <a title="Start timelapse - loop selected place names" id="loop-pits" className="float-right" href="#" onClick={this.toggleLoop}>
             {loopMessage}
           <img src="images/rocket.png" height="18px"/></a>
           </span>;
