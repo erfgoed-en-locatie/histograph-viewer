@@ -57,16 +57,21 @@ var ResultsBox = React.createClass({displayName: "ResultsBox",
     this.setState({graphHidden: !this.state.graphHidden});
   },
 
-  handleBack: function() {
+  handleBack: function(event) {
+    this.setState({graphHidden: true});
+
     this.setProps({
       selected: -1
     });
+    event.preventDefault();
   },
 
-  handleHide: function() {
+  handleHide: function(event) {
     this.setProps({
       hidden: true
     });
+
+    event.preventDefault();
   },
 
   handleSelect: function(index) {
@@ -182,7 +187,6 @@ var ConceptsBoxListItem = React.createClass({displayName: "ConceptsBoxListItem",
     }
 
     var sources = feature.properties.pits
-      //.filter(function(pit) { return pit.geometryIndex >= 0; })
       .map(function(pit) { return pit.source; })
       .unique();
 
@@ -248,8 +252,7 @@ var ConceptsBoxListItem = React.createClass({displayName: "ConceptsBoxListItem",
   },
 
   componentDidMount: function() {
-    var _this = this,
-        feature = this.props.feature;
+    var feature = this.props.feature;
 
     this.featureGroup = L.featureGroup();
 
@@ -278,18 +281,19 @@ var ConceptsBoxListItem = React.createClass({displayName: "ConceptsBoxListItem",
     .forEach(function(feature) {
       var geojson = L.geoJson(feature, {
         geometryType: feature.geometry.type,
-        style: lineStyle,
+        style: defaultStyle.line,
         pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, pointStyle);
+          return L.circleMarker(latlng, defaultStyle.point);
         },
         onEachFeature: function(feature, layer) {
           layer.on('click', function (e) {
-            _this.zoom({
+            // TODO: FIX! bij pitlijst
+            this.zoom({
               hgid: feature.hgid,
               noFitBounds: true
             });
           });
-        }
+        }.bind(this)
       });
       this.featureGroup.addLayer(geojson);
     }.bind(this));
@@ -308,9 +312,9 @@ var ConceptsBoxListItem = React.createClass({displayName: "ConceptsBoxListItem",
       // TODO: make function for styling based on state
       // TODO: make selection object in state, denoting all possible selection states
       if (layer.options.geometryType == "Point") {
-        layer.setStyle(!this.state.selected &! this.state.unfade ? fadedPointStyle : pointStyle);
+        layer.setStyle(!this.state.selected &! this.state.unfade ? fadedStyle.point : defaultStyle.point);
       } else {
-        layer.setStyle(!this.state.selected &! this.state.unfade ? fadedLineStyle : lineStyle);
+        layer.setStyle(!this.state.selected &! this.state.unfade ? fadedStyle.point : defaultStyle.line);
       }
     }.bind(this));
   },
@@ -370,8 +374,9 @@ var ConceptBoxResults = React.createClass({displayName: "ConceptBoxResults",
     );
   },
 
-  showGraph: function() {
+  showGraph: function(event) {
     this.props.showGraph();
+    event.preventDefault();
   }
 });
 
@@ -393,13 +398,22 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
 
     return {
       loop: {
-        index: -1,
+        index: 0,
         timer: null,
         delay: 800
       },
+      hgids: {
+
+      },
       filters: {
         sources: sources,
-        name: /.*/
+        name: /.*/,
+        // geometryTypes: [
+        //   all: true,
+        //   points: true,
+        //   lines: true,
+        //   polygons: true
+        // ]
       },
       sortField: sortFields[0],
       sortFields: sortFields
@@ -412,7 +426,11 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
             .unique()
         filteredPits = this.props.feature.properties.pits
             .filter(function(pit) {
-              return this.state.filters.name.test(pit.name.toLowerCase()) && this.state.filters.sources[pit.source];
+
+              //this.props.feature
+
+              return this.state.filters.name.test(pit.name.toLowerCase())
+                   && this.state.filters.sources[pit.source];
             }.bind(this));
 
     if (this.state.sortField != this.state.sortFields[0]) {
@@ -434,11 +452,21 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
       }.bind(this));
     }
 
+    // // Set hgids, filtered hgids and disabled hgids (that did not pass filter) in state
+    // var allHgids = this.props.feature.properties.pits.map(function(pit) { return pit.hgid; }),
+    //     filteredHgids = filteredPits.map(function(pit) { return pit.hgid; });
+    //
+    // this.state.hgids = {
+    //   all: allHgids
+    //   filtered: filteredHgids
+    //   disabled: allHgids.filter(function(hgid) { return filteredHgids.indexOf(hgid) < 0 });
+    // };
+
     var geometryCount = filteredPits.filter(function(pit) {
       return pit.geometryIndex > -1;
     }).length;
 
-    filteredPits = filteredPits.map(function(pit, index) {
+    var pitComponents = filteredPits.map(function(pit, index) {
       var boundUpdateOtherPits = this.updateOtherPits.bind(this, index);
       return React.createElement(Pit, {key: pit.hgid, pit: pit, feature: this.props.feature, index: index, 
           featureGroups: this.props.featureGroups, pitLayers: this.props.pitLayers, 
@@ -472,7 +500,7 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
           React.createElement("table", {className: "indent"}, 
             React.createElement("tbody", null, 
               React.createElement("tr", null, 
-                React.createElement("td", null, "Data"), 
+                React.createElement("td", {className: "label"}, "Data"), 
                 React.createElement("td", null, 
                   React.createElement("a", {href: links['histograph']}, "API"), ", ", React.createElement("a", {href: links['jsonld']}, "JSON-LD Playground"), ", ", React.createElement("a", {href: links['geojson']}, "geojson.io")
                 )
@@ -513,7 +541,7 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
           )
         ), 
         React.createElement("ol", {id: "pits", className: "list"}, 
-          filteredPits
+          pitComponents
         )
       )
     );
@@ -529,9 +557,10 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
     }
   },
 
-  sort: function(field) {
+  sort: function(field, event) {
     this.state.sortField = field;
     this.forceUpdate();
+    event.preventDefault();
   },
 
   toggleLoop: function() {
@@ -546,10 +575,14 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
   },
 
   loopStep: function() {
-    var length = Object.keys(this.refs).length,
-        newIndex = length == 0 ? 0 : (this.state.loop.index + 1) % length;
-
-    this.state.loop.index = newIndex;
+    var refKeys = Object.keys(this.refs);
+    for (var i = 0; i < refKeys.length; i++) {
+      var newIndex = (i + this.state.loop.index + 1) % refKeys.length;
+      if (this.refs[refKeys[newIndex]].props.pit.geometryIndex > -1) {
+        this.state.loop.index = newIndex;
+        break;
+      }
+    }
 
     for (var ref in this.refs) {
       var item = this.refs[ref];
@@ -680,14 +713,9 @@ var Pit = React.createClass({displayName: "Pit",
     );
   },
 
-
-
-
   zoom: function(params) {
     if (!params.noFitBounds) {
-      console.log("Zoom naar PIT (maak functie)")
-      // Ja, nu dus terug naar dinges, en dan conceptlijst in
-      //fitBounds(this.featureGroup.getBounds());
+      fitBounds(this.props.pitLayers[this.props.pit.hgid].layer.getBounds());
     } else {
       //TODO: fix -60 hack!
       document.getElementById("concepts-box").scrollTop = React.findDOMNode(this).offsetTop - 60;
@@ -702,23 +730,43 @@ var Pit = React.createClass({displayName: "Pit",
     this.setState({selected: true, unfade: false});
   },
 
-  componentDidUpdate: function() {
+  setLayerStyle: function(style) {
     if (this.props.pit.geometryIndex > -1) {
       var pitLayer = this.props.pitLayers[this.props.pit.hgid],
-          layer = pitLayer.layer;
+          layer = pitLayer ? pitLayer.layer : undefined;
 
+      if (layer) {
+        if (style.point && style.line) {
+          if (layer.options.geometryType == "Point") {
+            layer.setStyle(style.point);
+          } else {
+            layer.setStyle(style.line);
+          }
+        } else {
+          layer.setStyle(style);
+        }
 
-
-      if (layer.options.geometryType == "Point") {
-        layer.setStyle(!this.state.selected &! this.state.unfade ? faded2PointStyle : pointStyle);
-      } else {
-        layer.setStyle(!this.state.selected &! this.state.unfade ? faded2LineStyle : lineStyle);
       }
     }
+  },
+
+  componentDidUpdate: function() {
+    this.setLayerStyle(!this.state.selected &! this.state.unfade ? fadedStyle : defaultStyle);
+  },
+
+  componentWillMount: function() {
+    this.setLayerStyle({
+      fill: true,
+      stroke: true
+    });
+  },
+
+  componentWillUnmount: function() {
+    this.setLayerStyle({
+      fill: false,
+      stroke: false
+    });
   }
-
-
-
 
 });
 
@@ -731,7 +779,14 @@ var Graph = React.createClass({displayName: "Graph",
         React.createElement("div", {id: "graph-container", className: "box-container"}, 
           React.createElement("div", {className: "box-container-padding"}, 
             React.createElement("div", {id: "graph-box", className: "box"}, 
-              React.createElement("svg", {id: "graph"})
+              React.createElement("svg", {id: "graph"}, 
+                React.createElement("defs", null, 
+                  React.createElement("marker", {id: "marker-arrow", orient: "auto", markerWidth: "8", markerHeight: "8", 
+                      refX: "12", refY: "4"}, 
+                    React.createElement("path", {d: "M0,0 V8 L8,4 Z"})
+                  )
+                )
+              )
             )
           )
         )

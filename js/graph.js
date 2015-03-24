@@ -7,9 +7,9 @@ function graph() {
         "label"
       ];
 
-  function chips(selection) {
-    var width = 400,
-        height = 400;
+  function makeGraph(selection) {
+    var width = 800,
+        height = 800;
 
     selection.each(function() {
       var groups = selection.selectAll("g")
@@ -76,7 +76,6 @@ function graph() {
         return "translate(" + d.x + "," + d.y + ")";
       };
 
-
       var tick = function () {
         circle.attr("transform", transform);
         text.attr("transform", transform);
@@ -96,15 +95,15 @@ function graph() {
 
       var circleRadius = 5,
           force = cola.d3adaptor()
-          //.jaccardLinkLengths(60,0.7)
+          .jaccardLinkLengths(100,0.7)
           //.linkDistance(50)
-          .symmetricDiffLinkLengths(90)
+          //.symmetricDiffLinkLengths(130)
 
           .start(30, 30)
           .on("tick", tick)
           .size([
-            800,
-            800
+            width,
+            height
           ]);
 
 
@@ -156,26 +155,22 @@ function graph() {
         text = textG.selectAll("text")
             .data(force.nodes(), function(d) { return d.hgid;});
 
-        text.enter().append("text")
+        var tspans = text.enter().append("text")
+
+        tspans.append("tspan")
+            .text(function(d) { return d.name; })
             .attr("x", "12px")
-            .attr("y", "12px")
-            .text(function(d) { return d.name; });
+            .attr("y", "12px");
+
+        tspans.append("tspan")
+            .text(function(d) { return d.hgid; })
+            .attr("class", "graph-hgid")
+            .attr("x", "12")
+            .attr("y", "30px");
+
         text.exit().remove();
 
         force.start();
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     });
   }
@@ -364,19 +359,19 @@ function graph() {
   //   force.start();
   // }
 
-  chips.width = function(_) {
+  makeGraph.width = function(_) {
     if (!arguments.length) return width;
     width = _;
-    return chips;
+    return makeGraph;
   }
 
-  chips.height = function(_) {
+  makeGraph.height = function(_) {
     if (!arguments.length) return height;
     height = _;
-    return chips;
+    return makeGraph;
   }
 
-  var bound = d3.rebind(chips, events, 'on');
+  var bound = d3.rebind(makeGraph, events, 'on');
 
   return bound;
 }
