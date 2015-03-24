@@ -73,7 +73,7 @@ function parseHash(hash) {
   hash.split("&").forEach(function(param) {
     if (param.indexOf("=") > -1) {
       var kv = param.split("=");
-      params[kv[0]] = kv[1];
+      params[kv[0]] = kv.slice(1).join("=");
     }
   });
 
