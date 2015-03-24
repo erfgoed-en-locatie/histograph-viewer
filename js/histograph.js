@@ -420,8 +420,8 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
         if (this.state.sortField == "name") {
           return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         } else if (this.state.sortField == "period") {
-          var dateA = a.startDate || a.endDate,
-              dateB = b.startDate || b.endDate;
+          var dateA = a.hasBeginning || a.hasEnd,
+              dateB = b.hasBeginning || b.hasEnd;
 
           // http://stackoverflow.com/questions/11526504/minimum-and-maximum-date
           if (!dateA) dateA = 8640000000000000;
@@ -463,7 +463,7 @@ var ConceptBoxList = React.createClass({displayName: "ConceptBoxList",
         links = {
           histograph: apiUrl,
           jsonld: "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl,
-          geojson: "http://geojson.io/#data=data:text/x-url," + encodeURIComponent(apiUrl)
+          geojson: "http://geojson.io/#data=data:text/x-url, " + encodeURIComponent(apiUrl)
         };
 
     return (
@@ -624,14 +624,14 @@ var Pit = React.createClass({displayName: "Pit",
       geometryRow = (React.createElement("tr", null, React.createElement("td", {className: "label"}, "Geometry"), React.createElement("td", null, "Jaatjes")));
     }
 
-    if (pit.startDate || pit.endDate) {
+    if (pit.hasBeginning || pit.hasEnd) {
       var period;
-      if (pit.startDate && pit.endDate) {
-        period = pit.startDate + " - " + pit.endDate;
-      } else if (pit.startDate) {
-        period = "from " + pit.startDate;
-      } else if (pit.endDate) {
-        period = "until " + pit.endDate;
+      if (pit.hasBeginning && pit.hasEnd) {
+        period = pit.hasBeginning + " - " + pit.hasEnd;
+      } else if (pit.hasBeginning) {
+        period = "from " + pit.hasBeginning;
+      } else if (pit.hasEnd) {
+        period = "until " + pit.hasEnd;
       }
       periodRow = (React.createElement("tr", null, React.createElement("td", {className: "label"}, "Period"), React.createElement("td", null, period)));
     }
