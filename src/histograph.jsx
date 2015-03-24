@@ -292,7 +292,7 @@ var ConceptsBoxListItem = React.createClass({
               hgid: feature.hgid,
               noFitBounds: true
             });
-          });
+          }.bind(this));
         }.bind(this)
       });
       this.featureGroup.addLayer(geojson);
@@ -408,12 +408,12 @@ var ConceptBoxList = React.createClass({
       filters: {
         sources: sources,
         name: /.*/,
-        // geometryTypes: [
-        //   all: true,
-        //   points: true,
-        //   lines: true,
-        //   polygons: true
-        // ]
+        geometryTypes: {
+          none: true,
+          points: true,
+          lines: true,
+          polygons: true
+        }
       },
       sortField: sortFields[0],
       sortFields: sortFields
@@ -426,11 +426,21 @@ var ConceptBoxList = React.createClass({
             .unique()
         filteredPits = this.props.feature.properties.pits
             .filter(function(pit) {
+              filterGeometryType = "none";
+              if (pit.geometryIndex > -1) {
+                var geometryType = this.props.feature.geometry.geometries[pit.geometryIndex].type;
+                if (geometryType === "Point" || geometryType === "MultiPoint") {
+                  filterGeometryType = "points";
+                } else if (geometryType === "LineString" || geometryType === "MultiLineString") {
+                  filterGeometryType = "lines";
+                } else if (geometryType === "Polygon" || geometryType === "MultiPolygon") {
+                  filterGeometryType = "polygons";
+                }
+              }
 
-              //this.props.feature
-
-              return this.state.filters.name.test(pit.name.toLowerCase())
-                   && this.state.filters.sources[pit.source];
+              return this.state.filters.geometryTypes[filterGeometryType]
+                  && this.state.filters.name.test(pit.name.toLowerCase())
+                  && this.state.filters.sources[pit.source];
             }.bind(this));
 
     if (this.state.sortField != this.state.sortFields[0]) {
@@ -524,6 +534,22 @@ var ConceptBoxList = React.createClass({
                   </span>
                 </td>
               </tr>
+
+              <tr>
+                <td className="label">Geom</td>
+                <td>
+                  <span className="geometry-type-list">
+                    {Object.keys(this.state.filters.geometryTypes).map(function(geometryType, index) {
+                      var boundFilterGeometryType = this.filterGeometryType.bind(this, geometryType),
+                          //geometry-type
+                          className = this.state.filters.geometryTypes[geometryType] ? "" : "filtered";
+                      return <span key={geometryType}><a className={className} href="#"
+                                onClick={boundFilterGeometryType}>{geometryType}</a></span>;
+                    }.bind(this))}
+                  </span>
+                </td>
+              </tr>
+
               <tr>
                 <td className="label">Sort</td>
                 <td className="sort-fields">
@@ -599,9 +625,15 @@ var ConceptBoxList = React.createClass({
     this.forceUpdate();
   },
 
-  filterName: function(e) {
+  filterName: function(event) {
     var value = document.getElementById("pit-name-filter").value.toLowerCase();
     this.state.filters.name = new RegExp(".*" + value + ".*");
+    this.forceUpdate();
+  },
+
+  filterGeometryType: function(geometryType, event) {
+    this.state.filters.geometryTypes[geometryType] = !this.state.filters.geometryTypes[geometryType];
+    event.preventDefault();
     this.forceUpdate();
   },
 

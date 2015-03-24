@@ -255,6 +255,7 @@ input[type="search"]:focus {
   content: " ";
 }
 
+.geometry-type-list span *.filtered,
 .source-list span *.filtered {
   opacity: 0.5;
 }
@@ -373,6 +374,7 @@ h6 {
   padding-bottom: 5px;
 }
 
+.geometry-type-list span:not(:last-child):after,
 .sort-fields span:not(:last-child):after {
   content: ", ";
 }
