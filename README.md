@@ -2,7 +2,7 @@
 
 [http://histograph.io/viewer](http://histograph.io/viewer)
 
-Web viewer for [Histograph](http://histograph.io) API & data, made with [Jekyll](http://jekyllrb.com/) and [React](). To run, type
+Web viewer for [Histograph](http://histograph.io) API & data, made with [Jekyll](http://jekyllrb.com/) and [React](https://facebook.github.io/react/). To run, type
 
     jekyll serve  --baseurl '' --port 4001
 
