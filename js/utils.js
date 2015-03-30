@@ -134,3 +134,5 @@ function getData(query) {
 
   });
 }
+
+document.getElementById("search-input").focus();
