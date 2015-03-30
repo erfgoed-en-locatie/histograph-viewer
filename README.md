@@ -4,6 +4,10 @@
 
 Web viewer for [Histograph](http://histograph.io) API & data, made with [Jekyll](http://jekyllrb.com/) and [React](https://facebook.github.io/react/). To run, type
 
+    jsx -w  --extension jsx ./src ./js
+
+And
+
     jekyll serve  --baseurl '' --port 4001
 
 The viewer is now running on [http://localhost:4001](http://localhost:4001).
