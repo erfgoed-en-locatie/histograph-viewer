@@ -101,7 +101,6 @@ if (location.hash) {
   parseHash(location.hash.substring(1));
 }
 
-
 /**
  * D3.js - GeoJSON from Histograph API
  */
