@@ -15,3 +15,7 @@ The viewer is now running on [http://localhost:4001](http://localhost:4001).
 Edit [`_data/api.yml`](_data/api.yml) to set your local Histograph API endpoint.
 
 [![](images/screenshot.jpg)](viewer#search=hoorn)
+
+## License
+
+The source for Histograph is released under the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
