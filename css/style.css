@@ -1,12 +1,8 @@
----
----
-
 /* Variables
    ========================================================================== */
 
-$primary-color: rgba({{ site.data.style.color }},1);
-$color-pattern: rgba({{ site.data.style.color }},0.4); //use rgba to not break the svg encoded string
-$sidebar-width: 450px;
+/*$primary-color: rgba(74,187,131,1);
+$sidebar-width: 450px;*/
 
 /* Fonts
    ========================================================================== */
@@ -144,17 +140,16 @@ h5 code {
   pointer-events: all;
   background-color: white;
   border-radius: 4px;
-//  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
   box-shadow: 0px 1px 5px rgba(50, 50, 50, 0.34)
 }
 
 #sidebar-container {
   left: 0;
-  width: $sidebar-width;
+  width: 450px /* $sidebar-width */;
 }
 
 #graph-container {
-  left: $sidebar-width;
+  left: 450px /*$sidebar-width*/;
   right: 0;
 
   position: fixed;
@@ -178,7 +173,7 @@ h5 code {
 }
 
 input[type="search"]:focus {
-  border: 1px solid $primary-color;
+  border: 1px solid rgba(74,187,131,1);
 }
 
 .list-box {
@@ -271,6 +266,8 @@ input[type="search"]:focus {
 .list li {
   margin-bottom: 0;
   clear: both;
+
+  cursor: pointer;
 }
 
 .clear {
@@ -298,7 +295,7 @@ ol#concepts li.selected {
 }
 
 h5 {
-  border-bottom-color: $primary-color;
+  border-bottom-color: rgba(74,187,131,1);
   border-bottom-style: solid;
   border-bottom-width: 3px;
   margin-bottom: 1px;
@@ -367,7 +364,7 @@ button.details {
 }
 
 h6 {
-  border-bottom-color: $primary-color;
+  border-bottom-color: rgba(74,187,131,1);
   border-bottom-style: solid;
   border-bottom-width: 1px;
   margin-bottom: 1px;
@@ -423,7 +420,7 @@ h6 {
 }
 
 .graph-pit.has-geometry {
-  fill: $primary-color;
+  fill: rgba(74,187,131,1);
 }
 
 text {
