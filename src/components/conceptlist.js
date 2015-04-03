@@ -11,7 +11,7 @@ module.exports = React.createClass({
   },
 
   render: function() {
-    var geojson = this.props.geojson.getValue();
+    var geojson = this.props.geojson;
     var message;
     if (geojson.features && geojson.features.length) {
       var concept = geojson.features.length == 1 ? "concept" : "concepts",
@@ -34,7 +34,8 @@ module.exports = React.createClass({
                 .join(",")
                 .hashCode();
 
-            return <ConceptListItem key={key} feature={this.props.geojson.features[index]} map={this.props.map} />;
+            return <ConceptListItem key={key} route={this.props.route}
+                feature={this.props.geojson.features[index]} map={this.props.map} index={index} />;
 
             // <ConceptsBoxList features={this.props.geojson.features} featureGroups={this.state.featureGroups}
             //   pitLayers={this.state.pitLayers} onSelect={this.handleSelect}/>
@@ -132,21 +133,21 @@ module.exports = React.createClass({
 
 var ConceptListItem = React.createClass({
 
-  getInitialProps: function() {
-    return {
-      //conceptLayer: null
-    };
-  },
-
-  getInitialState: function() {
-    return {
-      // selected: false,
-      // unfade: true
-    };
-  },
+  // getInitialProps: function() {
+  //   /*return {
+  //     //conceptLayer: null
+  //   };*/
+  // },
+  //
+  // getInitialState: function() {
+  //   /*return {
+  //     status: this.props.feature._status
+  //   };*/
+  // },
 
   render: function() {
-    var feature = this.props.feature.getValue();
+    // TODO: move to initialstate
+    var feature = this.props.feature;
     var sortedNames = this.sortNames(feature.properties.pits);
     var selectedName = sortedNames[0].name;
     var selectedNames = sortedNames.slice(0, 4).map(function(name) { return name.name; });
@@ -180,7 +181,7 @@ var ConceptListItem = React.createClass({
     var className = "padding concept"; //+ (!this.state.selected &! this.state.unfade ? " faded" : "");
 
     return (
-      <li className={className} onClick={this.zoom}>
+      <li className={className} onClick={this.zoom} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave}>
         <h5>
           <span>{selectedName}</span>
           <code>{feature.properties.type.replace("hg:", "")}</code>
@@ -208,6 +209,17 @@ var ConceptListItem = React.createClass({
     );
   },
 
+  mouseEnter: function() {
+    this.props.route.concept.highlighted.set(this.props.index);
+  },
+
+  mouseLeave: function() {
+    var highlighted = this.props.route.concept.highlighted.getValue();
+    if (highlighted == this.props.index) {
+      this.props.route.concept.highlighted.set(-1);
+    }
+  },
+
   details: function(params) {
     this.props.map.fitBounds(this.featureGroup.getBounds());
     // document.getElementById("concepts-box").scrollTop = 0;
@@ -218,6 +230,7 @@ var ConceptListItem = React.createClass({
   },
 
   zoom: function(params) {
+    this.props.route.concept.selected.set(this.props.index);
     this.props.map.fitBounds(this.featureGroup.getBounds());
 
     // if (!params.noFitBounds) {
@@ -255,7 +268,7 @@ var ConceptListItem = React.createClass({
   },
 
   componentDidMount: function() {
-    var feature = this.props.feature.getValue();
+    var feature = this.props.feature;
 
     this.featureGroup = L.featureGroup();
 

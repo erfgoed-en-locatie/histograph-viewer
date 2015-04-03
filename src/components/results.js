@@ -14,11 +14,11 @@ module.exports = React.createClass({
   },
 
   render: function() {
-    var geojson = this.props.geojson.getValue();
+    var geojson = this.props.geojson;
     if (geojson && geojson.features) {
       if (geojson.features.length > 0) {
         return (
-          <ConceptList geojson={this.props.geojson} map={this.props.map} />
+          <ConceptList geojson={this.props.geojson} map={this.props.map} route={this.props.route} />
         );
       } else {
         var message = 'No concepts found';

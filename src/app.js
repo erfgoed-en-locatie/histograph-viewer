@@ -11,9 +11,11 @@ module.exports = React.createClass({
   getInitialState: function() {
     return {
       sidebarWidth: 450,
-      geojson: new Cortex({}, function(updatedCortex) {
+      geojson: null,
+      route: new Cortex({}, function(updatedRoute) {
+        console.log(updatedRoute.concept.highlighted.getValue());
         this.setState({
-          geojson: updatedCortex
+          route: updatedRoute
         });
       }.bind(this))
     };
@@ -31,10 +33,10 @@ module.exports = React.createClass({
                   onKeyDown={this.search} ref='searchInput' />
             </div>
 
-            <Results geojson={this.state.geojson} ref='results' map={this.refs.map} />
+            <Results geojson={this.state.geojson} route={this.state.route} ref='results' map={this.refs.map} />
           </div>
         </div>
-        <Map geojson={this.state.geojson} sidebarWidth={this.state.sidebarWidth} ref='map' />
+        <Map route={this.state.route} sidebarWidth={this.state.sidebarWidth} ref='map' />
       </div>
     );
   },
@@ -66,10 +68,22 @@ module.exports = React.createClass({
         }
       }
 
-      this.state.geojson.set(geojson);
+      var route = {
+        search: null,
+        concept: {
+          highlighted: -1,
+          selected: -1
+        },
+        pit: {
+          highlighted: -1,
+          selected: -1
+        }
+      };
+
+      this.state.geojson = geojson;
+      this.state.route.set(route);
 
       // document.getElementById('concepts-box').scrollTop = 0;
-
 
     }.bind(this));
   },
