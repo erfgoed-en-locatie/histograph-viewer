@@ -4,13 +4,25 @@ var React = require('react');
 
 module.exports = React.createClass({
   render: function() {
+    // TODO: move to getInitialState/Props
+    var closeText = 'Close';
+    if (this.props.closeText) {
+      closeText = this.props.closeText;
+    }
+
     return (
       <div id="concepts-results" className="padding results">
         <span id="concepts-results-message">{this.props.message}</span>
-        <a id="concepts-close" className="float-right" href="#" onClick={this.props.hide}>Close</a>
+        <a id="concepts-close" className="float-right" href="#" onClick={this.closeClick}>{closeText}</a>
       </div>
     );
+  },
+
+  closeClick: function(e) {
+    e.preventDefault();
+    this.props.onMessageClose();
   }
+
 });
 
 // var ConceptsBoxResults = React.createClass({

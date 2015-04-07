@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "watchify -d -t reactify src/index.js -o dist/bundle.js & serve",
-    "test": "eslint src/*.js src/components/*.js src/components/**/*.js"
+    "test": "eslint src/*.js src/components/*.js"
   },
   "repository": {
     "type": "git",

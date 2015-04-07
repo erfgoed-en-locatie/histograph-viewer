@@ -207,8 +207,10 @@ input[type="search"]:focus {
   background-image: url(../images/geometry-types_polygon.svg);
 }
 
-
 /*.concept*/ table {
+/*  width: 100%;
+  table-layout: fixed;
+  word-break: break-word;*/
   margin-bottom: 1rem;
 }
 
@@ -230,12 +232,18 @@ input[type="search"]:focus {
   content: ':';
 }
 
+.place-name,
 .concept-alt-name {
   font-style: italic;
 }
 
+.place-name:before,
 .concept-alt-name:before {
   content: '“';
+}
+
+.place-name:after {
+  content: "”";
 }
 
 .concept-alt-name:after  {
@@ -261,6 +269,7 @@ input[type="search"]:focus {
 .list {
   list-style-type: none;
   margin-bottom: 0;
+  margin-left: 0;
 }
 
 .list li {
@@ -275,15 +284,11 @@ input[type="search"]:focus {
 }
 
 .faded {
-  opacity: 0.35;
-}
-
-.faded:hover {
-  opacity: 0.75;
+  opacity: 0.45;
 }
 
 .list li:not(:last-child) {
-  margin-bottom: 3.3em;
+  padding-bottom: 2.6em;
 }
 
 .list li.pit:not(:last-child) {
