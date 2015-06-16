@@ -14,13 +14,13 @@ module.exports = React.createClass({
     var closeText;
     if (selectedConcept == -1) {
       if (geojson.features && geojson.features.length) {
-        var concept = geojson.features.length == 1 ? "concept" : "concepts",
+        var concept = geojson.features.length == 1 ? "place concept" : "place concepts",
             message = geojson.features.length + " " + concept+ " found:";
       } else if (this.props.error) {
         // TODO: error
         message = "Error: " + "FOUT";
       } else {
-        message = "No concepts found";
+        message = "No place concepts found";
       }
     } else {
       message = '1 concept selected:';

@@ -57,7 +57,7 @@ module.exports = React.createClass({
   render: function() {
     var highlighted = this.props.route.concept.highlighted.getValue();
     var selected = this.props.route.concept.selected.getValue();
-    var className = 'padding concept';
+    var className = 'concept';
     if (highlighted != -1 && highlighted != this.props.index) {
       className += ' faded';
     }
@@ -65,7 +65,7 @@ module.exports = React.createClass({
     var conceptContent;
     if (selected == -1) {
       conceptContent = <ConceptSimple sources={this.state.sources} names={this.state.names}
-          showDetails={this.details} />;
+          type={this.props.feature.properties.type} showDetails={this.details} />;
     } else {
       conceptContent = <ConceptDetails sources={this.state.sources} names={this.state.names}
           feature={this.props.feature} />;
@@ -73,10 +73,12 @@ module.exports = React.createClass({
 
     return (
       <li className={className} onClick={this.zoom} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave}>
-        <h5>
-          <span>{this.state.names.name}</span>
-          <code>{this.props.feature.properties.type.replace("hg:", "")}</code>
-        </h5>
+        <div className='side-padding'>
+          <h5>
+            <span>{this.state.names.name}</span>
+            <span className='type-header'>{this.props.feature.properties.type.replace("hg:", "")}</span>
+          </h5>
+        </div>
         {conceptContent}
       </li>
     );

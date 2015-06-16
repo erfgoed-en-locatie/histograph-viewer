@@ -84,6 +84,13 @@ $sidebar-width: 450px;*/
   font-style: italic;
 }
 
+@font-face {
+  font-family: 'Inconsolata';
+  src: url("../fonts/Inconsolata-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Style
    ========================================================================== */
 
@@ -101,6 +108,10 @@ h5 code {
 
 .hidden {
   display: none;
+}
+
+.right {
+  float: right;
 }
 
 .box-container {
@@ -123,7 +134,12 @@ h5 code {
 }
 
 .padding {
-  padding: 7px;
+  padding: .8em;
+/*  padding: 7px;*/
+}
+
+.side-padding {
+  padding: 0 .8em;
 }
 
 .cell-padding {
@@ -211,17 +227,34 @@ input[type="search"]:focus {
 /*  width: 100%;
   table-layout: fixed;
   word-break: break-word;*/
+  word-wrap: break-word;
+  table-layout: fixed;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 /*.concept*/ table td {
   vertical-align: top;
+}
+/*
+table td a {
+  word-wrap: break-word;
+}
+*/
+table td:first-child {
+  width: 70px;
 }
 
 /*.concept*/ table th,
 /*.concept*/ table td {
   border-bottom-style: none;
   padding: 6px 6px 6px 0px;
+}
+
+table tr:not(:last-child) {
+  border-bottom-color: rgba(100,100,100,0.1);
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
 }
 
 /*.concept*/ table tr td.label {
@@ -254,12 +287,17 @@ input[type="search"]:focus {
   content: "” ";
 }
 
-.source-list > *:after {
-  content: " ";
+.source-list > *:not(:last-child):after {
+  content: ", ";
 }
 
 .geometry-type-list span *.filtered,
 .source-list span *.filtered {
+  opacity: 0.5;
+}
+
+.type-header {
+  float: right;
   opacity: 0.5;
 }
 
@@ -287,24 +325,34 @@ input[type="search"]:focus {
   opacity: 0.45;
 }
 
-.list li:not(:last-child) {
-  padding-bottom: 2.6em;
+.list li {
+  padding-top: 0.8em;
+  padding-bottom: 0.2em;
+}
+
+.list li {
+
 }
 
 .list li.pit:not(:last-child) {
   margin-bottom: 0;
 }
 
-ol#concepts li.selected {
-  background-color: rgba(255, 140, 140, 0.3);
+/*.list li:nth-child(odd) {
+  background-color: rgba(250, 250, 250, 1);
 }
+
+.list li:nth-child(even) {
+  background-color: white;
+}*/
+
 
 h5 {
   border-bottom-color: rgba(74,187,131,1);
   border-bottom-style: solid;
   border-bottom-width: 3px;
   margin-bottom: 1px;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
 }
 
 .box h5 code {
@@ -312,12 +360,18 @@ h5 {
 }
 
 .source-list {
+  font-family: 'Inconsolata';
+  font-size: 16px;
   list-style-type: none;
   margin: 0;
 }
 
 .source-list li {
   display: inline-block;
+}
+
+.show-details {
+  float: right;
 }
 
 .buttons {
@@ -433,3 +487,23 @@ text {
   pointer-events: none;
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
 }
+
+.pit {
+/*  padding-left: 36px;*/
+}
+
+.box ul:last-child,
+.box p:last-child {
+  margin-bottom: 0;
+}
+
+#options-container {
+  left: 450px;
+  width: 450px;
+}
+
+
+
+#search-options {
+}
+

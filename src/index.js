@@ -5,7 +5,7 @@ var App = require('./app');
 
 var el = document.getElementById('app');
 
-React.render(<App apiUrl='http://api.histograph.io/' />, el);
+React.render(<App apiUrl='https://api.histograph.io/' />, el);
 
 Array.prototype.unique = function() {
 	var n = {},
@@ -25,7 +25,8 @@ String.prototype.hashCode = function() {
   for (i = 0, len = this.length; i < len; i++) {
     chr   = this.charCodeAt(i);
     hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
+    // Convert to 32 bit integer
+    hash |= 0;
   }
   return hash;
 };

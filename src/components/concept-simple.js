@@ -5,7 +5,7 @@ var React = require('react');
 module.exports = React.createClass({
   render: function() {
     return (
-      <div>
+      <div className='side-padding'>
         <table>
           <tbody>
             <tr>
@@ -24,16 +24,18 @@ module.exports = React.createClass({
               <td>
                 <span className='source-list'>
                   {this.props.sources.map(function(source, index) {
-                    return <span key={index}><code>{source}</code></span>;
+                    return <span key={index}>{source}</span>;
                   })}
                 </span>
               </td>
             </tr>
+            <tr>
+              <td colSpan='2'>
+                <a className='show-details' onClick={this.props.showDetails} title='Show concept details' href='#'>Show details</a>
+              </td>
+            </tr>
           </tbody>
         </table>
-        <div className='buttons'>
-          <button className='details' onClick={this.props.showDetails} title='Show concept details'>Details...</button>
-        </div>
         <div className='clear' />
       </div>
     );

@@ -42,7 +42,7 @@ module.exports = React.createClass({
       geometrySpan = (<span title={geometryType} className={geometryClassName}/>);
     }
 
-    var className = 'pit';// + (!this.state.selected &! this.state.unfade ? ' faded' : '');
+    var className = 'padding pit';// + (!this.state.selected &! this.state.unfade ? ' faded' : '');
 
     return (
       <li className={className}>

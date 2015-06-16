@@ -28,8 +28,13 @@ module.exports = React.createClass({
         }
       }
     } else {
-      // if needed, welcome/introduction message could be returned here
-      return null;
+      return (
+        <div className='box padding'>
+          <p>
+            Search for names, alternative names and old spelling variants of streets, places, municipalities and provinces in the Netherlands. Some examples: <a href='#search=noviomagus'>Noviomagus</a>, <a href='#search=sutpheren'>Sutpheren</a>, <a href='#search=friese%20landen'>Friese landen</a>.
+          </p>
+        </div>
+      );
     }
   },
 

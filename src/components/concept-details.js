@@ -26,6 +26,7 @@ module.exports = React.createClass({
     return {
       links: {
         histograph: apiUrl,
+        geothesaurus: 'http://geothesaurus.nl/hgconcept/frompit/' + firstHgid,
         jsonld: "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl,
         geojson: "http://geojson.io/#data=data:text/x-url, " + encodeURIComponent(apiUrl)
       },
@@ -112,43 +113,36 @@ module.exports = React.createClass({
 
 
     var filterMessage;
-    if (filteredPits.length > 0) {
-      var loopMessage = this.state.loop.timer ? "Stop " : "Timelapse ";
-      filterMessage = <span>
-          Showing {filteredPits.length} place {filteredPits.length == 1 ? "name" : "names"} ({geometryCount} on map):
-          <a title="Start timelapse - loop selected place names" id="loop-pits" className="float-right" href="#" onClick={this.toggleLoop}>
-            {loopMessage}
-          <img src="images/rocket.png" height="18px"/></a>
-          </span>;
-    } else {
-      filterMessage = <span>No place names matching your filter</span>;
-    }
 
+
+    // {message}  <a id="show-graph" className="float-right" href="#" onClick={this.showGraph}>Show graph</a>
 
 
     return (
       <div>
-        <div>
-          {message}
-          <a id="show-graph" className="float-right" href="#" onClick={this.showGraph}>Show graph</a>
-        </div>
-        <div>
+        <div className='side-padding'>
           <table>
             <tbody>
               <tr>
                 <td className="label">Data</td>
                 <td>
-                  <a href={this.state.links['histograph']}>API</a>, <a href={this.state.links['jsonld']}>JSON-LD Playground</a>, <a href={this.state.links['geojson']}>geojson.io</a>
+                  <a href={this.state.links['histograph']}>API</a>, <a href={this.state.links['geothesaurus']}>GeoThesaurus</a>, <a href={this.state.links['jsonld']}>JSON-LD</a>, <a href={this.state.links['geojson']}>geojson.io</a>
+                </td>
+              </tr>
+
+              <tr>
+                <td className="label">Concept</td>
+                <td>
+                  7 place names, 7 relations (<a href='#'>show graph</a>)
                 </td>
               </tr>
 
               <tr>
                 <td className="label">Filters</td>
                 <td>
-                  show filters
+                  <a href='#'>filter place names</a>
                 </td>
               </tr>
-
 
             </tbody>
             <tbody className="hidden indent">
@@ -203,8 +197,6 @@ module.exports = React.createClass({
             {filterMessage}
           </p>
         </div>
-
-
 
         <ol id="pits" className="list">
           {pits}
