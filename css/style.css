@@ -194,7 +194,7 @@ input[type="search"]:focus {
 
 .list-box {
   width: 100%;
-  max-height: calc(100% - 62px);
+  max-height: calc(100% - 72px);
   overflow-y: auto;
 }
 
