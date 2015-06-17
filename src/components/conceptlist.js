@@ -71,6 +71,7 @@ module.exports = React.createClass({
       this.props.route.hidden.set(true);
     } else {
       this.props.route.concept.selected.set(-1);
+      this.props.route.fitBounds.set(true);
     }
   }
 
