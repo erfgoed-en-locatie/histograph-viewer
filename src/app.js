@@ -8,6 +8,8 @@ var Graph = require('./components/graph');
 var d3 = require('d3');
 var Cortex = require('cortexjs');
 
+var disableHashChange = false;
+
 module.exports = React.createClass({
 
   getInitialState: function() {
@@ -48,6 +50,17 @@ module.exports = React.createClass({
 
   componentDidMount: function() {
     React.findDOMNode(this.refs.searchInput).focus();
+
+    window.onhashchange = window.onhashchange || function() {
+      if (!disableHashChange) {
+        this.handleHash(this.parseHash(location.hash.substring(1)));
+      }
+    }.bind(this);
+
+    if (location.hash) {
+      this.handleHash(this.parseHash(location.hash.substring(1)));
+    }
+
     this.setState({
       sidebarWidth: React.findDOMNode(this.refs.container).offsetWidth
     });
@@ -59,6 +72,8 @@ module.exports = React.createClass({
       // TODO: hash! react router?
       //setHash('search=' + value);
       this.callApi(value);
+
+      this.setHash('search=' + value);
     }
   },
 
@@ -123,6 +138,33 @@ module.exports = React.createClass({
     }
 
     return url + params.join('&');
+  },
+
+  parseHash: function (hash) {
+    var params = {};
+    decodeURIComponent(hash).split("&").forEach(function(param) {
+      if (param.indexOf("=") > -1) {
+        var kv = param.split("=");
+        params[kv[0]] = kv.slice(1).join("=");
+      }
+    });
+
+    return params;
+  },
+
+  handleHash: function (params){
+    if (params.search) {
+      d3.select("input[type=search]").property('value', params.search);
+      this.search({keyCode: 13});
+    }
+  },
+
+  setHash: function(hash){
+    disableHashChange = true;
+    location.hash = hash;
+    setTimeout(function(){
+      disableHashChange = false;
+    }, 1000);
   }
 
 });
