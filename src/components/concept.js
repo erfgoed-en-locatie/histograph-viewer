@@ -68,7 +68,7 @@ module.exports = React.createClass({
           type={this.props.feature.properties.type} showDetails={this.details} />;
     } else {
       conceptContent = <ConceptDetails sources={this.state.sources} names={this.state.names}
-          feature={this.props.feature} />;
+          feature={this.props.feature} route={this.props.route} />;
     }
 
     return (

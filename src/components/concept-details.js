@@ -133,7 +133,7 @@ module.exports = React.createClass({
               <tr>
                 <td className="label">Concept</td>
                 <td>
-                  7 place names, 7 relations (<a href='#'>show graph</a>)
+                  7 place names, 7 relations (<a href='#' onClick={this.showGraph}>{ this.state.graphHidden ? 'hide' : 'show' } graph</a>)
                 </td>
               </tr>
 
@@ -288,9 +288,13 @@ module.exports = React.createClass({
 
     event.preventDefault();
     this.forceUpdate();
+  },
+
+  showGraph: function(){
+    this.setState({graphHidden: !this.state.graphHidden});
+    
+    this.props.route.graph.set(!this.props.route.graph.getValue());
   }
-
-
 
 
 
