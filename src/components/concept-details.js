@@ -3,6 +3,35 @@
 var React = require('react');
 var Pit = require('./pit');
 
+var linkFormatters = {
+      histograph: function(apiUrl, firstHgid){ return apiUrl },
+      geothesaurus: function(apiUrl, firstHgid){ return 'http://geothesaurus.nl/hgconcept/frompit/' + firstHgid; },
+      jsonld: function(apiUrl, firstHgid){ return "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl; },
+      geojson: function(apiUrl, firstHgid){ return "http://geojson.io/#data=data:text/x-url, " + encodeURIComponent(apiUrl); }
+    },
+    linkLabels = {
+      histograph: 'API',
+      geothesaurus: 'GeoThesaurus',
+      jsonld: 'JSON-LD',
+      geojson: 'geojson.io'
+    };
+
+function getLinks(feature, linksWanted){
+  var firstHgid = feature.properties.pits[0].hgid,
+      apiUrl = 'https://api.erfgeo.nl/search?hgid=' + firstHgid, // getApiURL();
+      links = [];
+
+  linksWanted.forEach(function(value){
+    if(!linkFormatters[value]){
+      throw(new Error('getLinks:linkFormatterNotFound:' + value));
+    }
+
+    links.push({ label: linkLabels[value], href: linkFormatters[value](apiUrl, firstHgid) });
+  });
+
+  return links;
+}
+
 module.exports = React.createClass({
 
   getInitialState: function() {
@@ -21,15 +50,12 @@ module.exports = React.createClass({
 
     var firstHgid = this.props.feature.properties.pits[0].hgid;
     // TODO: use getApiURL function
-    var apiUrl = 'http://' + firstHgid;
+    var apiUrl = 'https://api.erfgeo.nl/search?hgid=' + firstHgid;
+
+
 
     return {
-      links: {
-        histograph: apiUrl,
-        geothesaurus: 'http://geothesaurus.nl/hgconcept/frompit/' + firstHgid,
-        jsonld: "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl,
-        geojson: "http://geojson.io/#data=data:text/x-url, " + encodeURIComponent(apiUrl)
-      },
+      links: getLinks(this.props.feature, ['histograph', 'geothesaurus', 'jsonld', 'geojson']).map(function(a){ return <span><a href={a.href}>{a.label}</a></span>; }),
       loop: {
         index: 0,
         timer: null,
@@ -58,7 +84,6 @@ module.exports = React.createClass({
   },
 
   render: function() {
-
     var pitCount = this.props.feature.properties.pits.length;
     var message = "Concept contains " + pitCount + " place "
         + ((pitCount == 1) ? "name" : "names");
@@ -125,8 +150,8 @@ module.exports = React.createClass({
             <tbody>
               <tr>
                 <td className="label">Data</td>
-                <td>
-                  <a href={this.state.links['histograph']}>API</a>, <a href={this.state.links['geothesaurus']}>GeoThesaurus</a>, <a href={this.state.links['jsonld']}>JSON-LD</a>, <a href={this.state.links['geojson']}>geojson.io</a>
+                <td className="links">
+                  {this.state.links}
                 </td>
               </tr>
 
@@ -292,7 +317,7 @@ module.exports = React.createClass({
 
   showGraph: function(){
     this.setState({graphHidden: !this.state.graphHidden});
-    
+
     this.props.route.graph.set(!this.props.route.graph.getValue());
   }
 
