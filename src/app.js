@@ -118,26 +118,7 @@ module.exports = React.createClass({
   },
 
   getApiUrl: function(queryString) {
-    var url = this.props.apiUrl + 'search?';
-    var matches = queryString.match(/(\S*)=(\S*)/g);
-    var params = [];
-
-    if (matches) {
-      matches.forEach(function(match) {
-        queryString = queryString.replace(match, '');
-        params.push(match);
-      });
-    }
-
-    if (queryString.indexOf('http') > -1) {
-      params.push('uri=' + queryString.trim());
-    } else if (queryString.indexOf('/') > -1) {
-      params.push('hgid=' + queryString.trim());
-    } else {
-      params.push('name=' + queryString.trim());
-    }
-
-    return url + params.join('&');
+    return this.props.apiUrl + 'search?q=' + queryString.replace(' ', '');
   },
 
   parseHash: function (hash) {
