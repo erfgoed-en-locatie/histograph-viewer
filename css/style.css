@@ -507,7 +507,7 @@ td.links a:hover{
 }
 
 td.links span:not(:last-child):after{
-  content: ', ';
+  content: ',\00a0';
   text-decoration: none;
   cursor: default;
   display: inline-block;
