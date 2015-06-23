@@ -31,7 +31,7 @@ module.exports = React.createClass({
             </tr>
             <tr>
               <td colSpan='2'>
-                <a className='show-details' onClick={this.props.showDetails} title='Show concept details' href='#'>Show details</a>
+                <a className='show-details' onClick={this.props.showDetails} title='Show concept details' href='javascript:void(0)'>Show details</a>
               </td>
             </tr>
           </tbody>
