@@ -12,7 +12,7 @@ var languages = {
 };
 
 var language = languages.english;
-language = languages.dutch;
+//language = languages.dutch;
 
 module.exports = React.createClass({
 
