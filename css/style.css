@@ -513,6 +513,13 @@ td.links span:not(:last-child):after{
   display: inline-block;
 }
 
+p.examples a:not(:last-child):after{
+  content: ',\00a0';
+  text-decoration: none;
+  cursor: default;
+  display: inline-block;
+}
+
 
 #search-options {
 }
