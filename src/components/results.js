@@ -5,9 +5,21 @@ var ConceptList = require('./conceptlist');
 var Concept = require('./concept');
 var Message = require('./message');
 
+var languages = {
+  english: require('../language/english.json'),
+  dutch: require('../language/dutch.json')
+};
+
+var language = languages.english;
+language = languages.dutch;
+
 module.exports = React.createClass({
 
   render: function() {
+    var examples = language.queryExamples.map(function(values){
+      return <a href={ values.href }>{values.label}</a>  ;
+    });
+
     var geojson = this.props.geojson;
     if (geojson && geojson.features) {
       if (geojson.features.length > 0) {
@@ -20,7 +32,7 @@ module.exports = React.createClass({
         if (!this.props.route.hidden.getValue()) {
           return (
             <div className='box list-box'>
-              <Message message='No concepts found' error={true} onMessageClose={this.messageClose} />
+              <Message message={ language.no_concepts_found } error={true} onMessageClose={this.messageClose} />
             </div>
           );
         } else {
@@ -30,9 +42,8 @@ module.exports = React.createClass({
     } else {
       return (
         <div className='box padding'>
-          <p>
-            Search for names, alternative names and old spelling variants of streets, places, municipalities and provinces in the Netherlands. Some examples: <a href='#search=noviomagus'>Noviomagus</a>, <a href='#search=sutpheren'>Sutpheren</a>, <a href='#search=friese%20landen'>Friese landen</a>.
-          </p>
+          <p>{ language.explanation }</p>
+          <p className="examples">{ language.queryExamplesIntro }: {examples}</p>
         </div>
       );
     }

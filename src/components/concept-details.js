@@ -3,6 +3,14 @@
 var React = require('react');
 var Pit = require('./pit');
 
+var languages = {
+  english: require('../language/english.json'),
+  dutch: require('../language/dutch.json')
+};
+
+var language = languages.english;
+language = languages.dutch;
+
 var linkFormatters = {
       histograph: function(apiUrl, firstHgid){ return apiUrl },
       geothesaurus: function(apiUrl, firstHgid){ return 'http://geothesaurus.nl/hgconcept/frompit/' + firstHgid; },
@@ -32,6 +40,10 @@ function getLinks(feature, linksWanted){
   return links;
 }
 
+function transformToAnchor(a){
+  return <span><a href={a.href}>{a.label}</a></span>;
+}
+
 module.exports = React.createClass({
 
   getInitialState: function() {
@@ -55,7 +67,7 @@ module.exports = React.createClass({
 
 
     return {
-      links: getLinks(this.props.feature, ['histograph', 'geothesaurus', 'jsonld', 'geojson']).map(function(a){ return <span><a href={a.href}>{a.label}</a></span>; }),
+      links: getLinks(this.props.feature, ['histograph', 'geothesaurus', 'jsonld', 'geojson']).map(transformToAnchor),
       loop: {
         index: 0,
         timer: null,
@@ -85,8 +97,8 @@ module.exports = React.createClass({
 
   render: function() {
     var pitCount = this.props.feature.properties.pits.length;
-    var message = "Concept contains " + pitCount + " place "
-        + ((pitCount == 1) ? "name" : "names");
+    var message = language.Concept_contains + " " + pitCount + " " + language.place + " "
+        + ((pitCount == 1) ? language.name : language.names);
 
     var filteredPits = this.props.feature.properties.pits
         .filter(function(pit) {
@@ -139,6 +151,21 @@ module.exports = React.createClass({
 
     var filterMessage;
 
+    var pitsCount = this.props.feature.properties.pits.length,
+        relationsCount = 0;
+    this.props.feature.properties.pits.forEach(function(pit) {
+      if(!pit.relations) return;
+
+      var keys = Object.keys(pit.relations);
+
+      if(keys.length > 1){
+        keys.forEach(function(key){
+          if(key !== '@id'){
+            relationsCount += pit.relations[key].length;
+          }
+        });
+      }
+    });
 
     // {message}  <a id="show-graph" className="float-right" href="#" onClick={this.showGraph}>Show graph</a>
 
@@ -149,36 +176,36 @@ module.exports = React.createClass({
           <table>
             <tbody>
               <tr>
-                <td className="label">Data</td>
+                <td className="label">{ language.Data }</td>
                 <td className="links">
                   {this.state.links}
                 </td>
               </tr>
 
               <tr>
-                <td className="label">Concept</td>
+                <td className="label">{ console.log(this) || language.Concept }</td>
                 <td>
-                  7 place names, 7 relations (<a href='#' onClick={this.showGraph}>{ this.state.graphHidden ? 'hide' : 'show' } graph</a>)
+                  { pitsCount } { language.place } {language.names}, { relationsCount } {language.relations} (<a href='#' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)
                 </td>
               </tr>
 
               <tr>
-                <td className="label">Filters</td>
+                <td className="label">{ language.Filters }</td>
                 <td>
-                  <a href='#'>filter place names</a>
+                  <a href='#'>{ language.filter_place_names }</a>
                 </td>
               </tr>
 
             </tbody>
             <tbody className="hidden indent">
               <tr>
-                <td className="label">Names</td>
+                <td className="label">{ language.Names }</td>
                 <td>
-                  <input type="search" placeholder="Filter names" id="pit-name-filter" onChange={this.filterName}/>
+                  <input type="search" placeholder={ language.filter_names } id="pit-name-filter" onChange={this.filterName}/>
                 </td>
               </tr>
               <tr>
-                <td className="label">Sources</td>
+                <td className="label">{ language.Sources }</td>
                 <td>
                   <span className="source-list">
                     {this.props.sources.map(function(source, index) {
@@ -192,7 +219,7 @@ module.exports = React.createClass({
               </tr>
 
               <tr>
-                <td className="label">Geom</td>
+                <td className="label">{ language.Geom }</td>
                 <td>
                   <span className="geometry-type-list">
                     {Object.keys(this.state.filters.geometryTypes).map(function(geometryType, index) {
@@ -207,7 +234,7 @@ module.exports = React.createClass({
               </tr>
 
               <tr>
-                <td className="label">Sort</td>
+                <td className="label">{ language.Sort }</td>
                 <td className="sort-fields">
                   {this.state.sortFields.map(function(field, index) {
                     var boundSort = this.sort.bind(this, field),

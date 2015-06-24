@@ -6,6 +6,14 @@ var ConceptSimple = require('./concept-simple');
 var ConceptDetails = require('./concept-details');
 var Message = require('./message');
 
+var languages = {
+  english: require('../language/english.json'),
+  dutch: require('../language/dutch.json')
+};
+
+var language = languages.english;
+language = languages.dutch;
+
 module.exports = React.createClass({
 
   getInitialState: function() {
@@ -17,8 +25,8 @@ module.exports = React.createClass({
 
     if (selectedNames.length > 1) {
       var namesLengthDiff = sortedNames.length - selectedNames.length;
-      var namesPlurSing = namesLengthDiff == 1 ? "name" : "names";
-      selectedNamesSuffix = sortedNames.length > selectedNames.length ? " and " + namesLengthDiff + " other " +  namesPlurSing : "";
+      var namesPlurSing = namesLengthDiff == 1 ? language.name : language.names;
+      selectedNamesSuffix = sortedNames.length > selectedNames.length ? " " + language.and + " " + namesLengthDiff + " " + language.other + " " +  namesPlurSing : "";
     }
 
     var sources = feature.properties.pits

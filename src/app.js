@@ -8,6 +8,14 @@ var Graph = require('./components/graph');
 var d3 = require('d3');
 var Cortex = require('cortexjs');
 
+var languages = {
+  english: require('./language/english.json'),
+  dutch: require('./language/dutch.json')
+};
+
+var language = languages.english;
+language = languages.dutch;
+
 var disableHashChange = false;
 
 module.exports = React.createClass({
@@ -31,13 +39,11 @@ module.exports = React.createClass({
       <div>
         <div id='sidebar-container' className='box-container' ref='container'>
           <div className='box-container-padding'>
-
             <div id='search-box' className='box padding'>
               <a href='http://histograph.io/'><img src='images/histograph.svg' /></a>
-              <input type='search' placeholder='Search by name, Histograph ID, or URI'
+              <input type='search' placeholder={language.search_placeholder}
                   onKeyDown={this.search} ref='searchInput' />
             </div>
-
             <Results geojson={this.state.geojson} route={this.state.route} ref='results' map={this.refs.map} />
           </div>
         </div>
@@ -84,7 +90,7 @@ module.exports = React.createClass({
         try {
           errorMessage = JSON.parse(error.response).error;
         } catch (e) {
-          errorMessage = 'Invalid reponse from Histograph API';
+          errorMessage = language.invalid_response;
         }
       }
       // TODO: use errorMessage

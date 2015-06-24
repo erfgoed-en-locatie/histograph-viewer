@@ -2,13 +2,18 @@
 
 var React = require('react');
 
+var languages = {
+  english: require('../language/english.json'),
+  dutch: require('../language/dutch.json')
+};
+
+var language = languages.english;
+language = languages.dutch;
+
 module.exports = React.createClass({
   render: function() {
     // TODO: move to getInitialState/Props
-    var closeText = 'Close';
-    if (this.props.closeText) {
-      closeText = this.props.closeText;
-    }
+    var closeText = this.props && this.props.closeText || language.Close;
 
     return (
       <div id="concepts-results" className="padding results">

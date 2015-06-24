@@ -2,6 +2,14 @@
 
 var React = require('react');
 
+var languages = {
+  english: require('../language/english.json'),
+  dutch: require('../language/dutch.json')
+};
+
+var language = languages.english;
+language = languages.dutch;
+
 module.exports = React.createClass({
   render: function() {
     return (
@@ -31,7 +39,7 @@ module.exports = React.createClass({
             </tr>
             <tr>
               <td colSpan='2'>
-                <a className='show-details' onClick={this.props.showDetails} title='Show concept details' href='javascript:void(0)'>Show details</a>
+                <a className='show-details' onClick={this.props.showDetails} title={language.show_concept_details} href='javascript:void(0)'>{ language.show_details }</a>
               </td>
             </tr>
           </tbody>

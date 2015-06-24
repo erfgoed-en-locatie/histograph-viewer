@@ -5,6 +5,14 @@ var L = require('leaflet');
 var Concept = require('./concept');
 var Message = require('./message');
 
+var languages = {
+  english: require('../language/english.json'),
+  dutch: require('../language/dutch.json')
+};
+
+var language = languages.english;
+language = languages.dutch;
+
 module.exports = React.createClass({
 
   render: function() {
@@ -14,17 +22,17 @@ module.exports = React.createClass({
     var closeText;
     if (selectedConcept == -1) {
       if (geojson.features && geojson.features.length) {
-        var concept = geojson.features.length == 1 ? "place concept" : "place concepts",
-            message = geojson.features.length + " " + concept+ " found:";
+        var concept = geojson.features.length == 1 ? language.place_concept : language.place_concepts,
+            message = geojson.features.length + " " + concept + " " + language.found + ":";
       } else if (this.props.error) {
         // TODO: error
-        message = "Error: " + "FOUT";
+        message = language.error + ": " + "FOUT";
       } else {
-        message = "No place concepts found";
+        message = language.no_place_concepts_found;
       }
     } else {
-      message = '1 concept selected:';
-      closeText = "Back to concept list"
+      message = language.one_concept_selected;
+      closeText = language.back_to_concept_list;
     }
 
     var className;
