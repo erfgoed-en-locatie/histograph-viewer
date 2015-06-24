@@ -14,7 +14,7 @@ var languages = {
 };
 
 var language = languages.english;
-language = languages.dutch;
+//language = languages.dutch;
 
 var disableHashChange = false;
 
@@ -49,9 +49,13 @@ module.exports = React.createClass({
         </div>
         <SearchOptions />
         <Map route={this.state.route} sidebarWidth={this.state.sidebarWidth} ref='map' />
-        <Graph geojson={this.state.geojson} route={this.state.route} ref='graph' />
+        <Graph toggleLeafs={this.toggleLeafs} showLeafs={this.state.showLeafs} geojson={this.state.geojson} route={this.state.route} ref='graph' />
       </div>
     );
+  },
+
+  toggleLeafs: function(){
+    this.setState({showLeafs: !this.state.showLeafs });
   },
 
   componentDidMount: function() {
