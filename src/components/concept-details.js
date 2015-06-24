@@ -185,7 +185,7 @@ module.exports = React.createClass({
               <tr>
                 <td className="label">{ language.Concept }</td>
                 <td>
-                  { pitsCount } { language.place } {language.names}, { relationsCount } {language.relations} (<a href='#' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)
+                  { pitsCount } { language.place } {language.names}, { relationsCount } {language.relations} (<a href='javascript:void(0)' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)
                 </td>
               </tr>
 
