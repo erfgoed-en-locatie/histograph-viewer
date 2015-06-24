@@ -189,10 +189,10 @@ module.exports = React.createClass({
                 </td>
               </tr>
 
-              <tr>
+              <tr style={{display: 'none'}}>
                 <td className="label">{ language.Filters }</td>
                 <td>
-                  <a href='#'>{ language.filter_place_names }</a>
+                  <a href='javascript:void(0)'>{ language.filter_place_names }</a>
                 </td>
               </tr>
 
