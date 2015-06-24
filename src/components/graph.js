@@ -17,6 +17,7 @@ module.exports = React.createClass({
       <div id="graph-container" className="box-container">
         <div className="box-container-padding">
           <div id="graph-box" className="box">
+            <button onClick={this.props.toggleLeafs}>{this.props.showLeafs ? 'Show leafs' : 'Hide leafs'}</button>
             <svg id="graph">
               <defs>
                 <marker id='marker-arrow' orient='auto' markerWidth='8' markerHeight='8'
@@ -44,12 +45,12 @@ module.exports = React.createClass({
     
     d3.select("#graph")
         .datum(feature)
-        .call(createNodeGraph, graphContainer);
+        .call(createNodeGraph, graphContainer, this);
 
   }
 });
 
-function createNodeGraph(selection, graphContainer){
+function createNodeGraph(selection, graphContainer, component){
   var width = graphContainer.offsetWidth,
       height = graphContainer.offsetHeight,
       svgGroups = [
@@ -92,6 +93,8 @@ function createNodeGraph(selection, graphContainer){
 
       Object.keys(pit.relations).forEach(function(relation) {
         if (relation !== "@id") {
+          if(!pit.relations[relation].length) return;
+
           pit.relations[relation].forEach(function(id) {
             var hgid = id["@id"],
                 target = nodes[hgid];
@@ -110,6 +113,31 @@ function createNodeGraph(selection, graphContainer){
 
     });
 
+  if(component.props.showLeafs){
+    Object.keys(nodes).forEach(function(name){
+      var node = nodes[name];
+
+      if(!node.outgoing.length){
+        node.isLeaf = true;
+      }
+    });
+
+    Object.keys(links).forEach(function(name){
+      var link = links[name];
+
+      if(link.target.isLeaf || link.source.isLeaf){
+        delete links[name];
+      }
+    });
+
+    Object.keys(nodes).forEach(function(name){
+      var node = nodes[name];
+
+      if(node.isLeaf){
+        delete nodes[name];
+      }
+    });
+  }
 
   var circle,
       text,
@@ -163,9 +191,7 @@ function createNodeGraph(selection, graphContainer){
         .attr("transform", transform)
         .attr("r", circleRadius)
         .attr("class", "graph-pit")
-        .classed("has-geometry", function(d) {
-          return d.geometryIndex > -1;
-        })
+        .classed("has-geometry", function(d) { return d.geometryIndex > -1; })
         //.on("click", vertexClick)
         .call(force.drag);
     circle.exit().remove();
