@@ -2,6 +2,7 @@
 
 var React = require('react');
 var d3 = require('d3');
+var _ = require('underscore');
 
 module.exports = React.createClass({
   checkNeccesary: function(){
@@ -63,7 +64,7 @@ function createNodeGraph(selection, graphContainer, component){
           .data(svgGroups)
           .enter('g')
           .append('g')
-          .attr('class', function(d){ return d; }),
+          .attr('class', _.identity),
         feature = d3.select(this).datum(),
         linkG = selection.select("." + svgGroups[0]),
         circleG = selection.select("." + svgGroups[1]),
@@ -149,11 +150,7 @@ function createNodeGraph(selection, graphContainer, component){
       tick = function () {
         circle.attr("transform", transform);
         text.attr("transform", transform);
-        link.attr("d", function(d) {
-          return "M" + d.source.x + "," + d.source.y + " "
-              + "L" + d.target.x + "," + d.target.y;
-        });
-
+        link.attr("d", createSVGPathString);
         //label.attr("xlink:href", function(d, i) { return "#path" + i; });
       },
       circleRadius = 5,
@@ -170,22 +167,21 @@ function createNodeGraph(selection, graphContainer, component){
 
 
 
-    force.nodes(d3.values(nodes))
-         .links(d3.values(links));
+    force
+      .nodes(d3.values(nodes))
+      .links(d3.values(links));
 
     link = linkG.selectAll("path")
         .data(force.links(), function(d) { return d.source.hgid + "-" + d.target.hgid; });
 
-    link.enter().append("path")
-        .attr("d", function(d) {
-          return "M" + d.source.x + "," + d.source.y + " "
-              + "L" + d.target.x + "," + d.target.y;
-        })
-        .attr("id", function(d, i) { return "path" + i; });
+    link.enter()
+      .append("path")
+      .attr("d", createSVGPathString)
+      .attr("id", function(d, i) { return "path" + i; });
     link.exit().remove();
 
     circle = circleG.selectAll("circle")
-        .data(force.nodes(), function(d) { return d.hgid;});
+        .data(force.nodes(), _.property('hgid') );
 
     circle.enter().append("circle")
         .attr("transform", transform)
@@ -197,17 +193,17 @@ function createNodeGraph(selection, graphContainer, component){
     circle.exit().remove();
 
     text = textG.selectAll("text")
-        .data(force.nodes(), function(d) { return d.hgid;});
+        .data(force.nodes(), _.property('hgid') );
 
     var tspans = text.enter().append("text")
 
     tspans.append("tspan")
-        .text(function(d) { return d.name; })
+        .text( _.property('name') )
         .attr("x", "12px")
         .attr("y", "12px");
 
     tspans.append("tspan")
-        .text(function(d) { return d.hgid; })
+        .text( _.property('hgid') )
         .attr("class", "graph-hgid")
         .attr("x", "12")
         .attr("y", "30px");
@@ -217,4 +213,8 @@ function createNodeGraph(selection, graphContainer, component){
     force.start();
 
   });
+}
+
+function createSVGPathString(link){
+  return "M" + link.source.x + "," + link.source.y + " " + "L" + link.target.x + "," + link.target.y;
 }
