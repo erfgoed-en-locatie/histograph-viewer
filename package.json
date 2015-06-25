@@ -8,6 +8,7 @@
     "d3": "^3.5.5",
     "leaflet": "^0.7.3",
     "react": "^0.13.1",
+    "underscore": "^1.8.3",
     "webcola": "^0.1.1"
   },
   "devDependencies": {
