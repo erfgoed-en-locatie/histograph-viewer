@@ -42973,8 +42973,8 @@ module.exports={
 	"queryExamplesIntro": "Wat voorbeelden",
 	"queryExamples": [
 		{ "href": "#search=noviomagus", "label": "Noviomagus" },
-		{ "href": "#search=sutpheren", "label": "Sutpheren" },
-		{ "href": "#search=friese%20landen", "label": "Friese landen" },
+		{ "href": "#search=sutphen", "label": "Sutphen" },
+		{ "href": "#search=\"aan zee\"", "label": "coastal towns" }
 	],
 	"place_concept": "plaats concept",
 	"place_concepts": "plaats concepten",
@@ -43016,8 +43016,8 @@ module.exports={
 	"queryExamplesIntro": "Some examples",
 	"queryExamples": [
 		{ "href": "#search=noviomagus", "label": "Noviomagus" },
-		{ "href": "#search=sutpheren", "label": "Sutpheren" },
-		{ "href": "#search=friese%20landen", "label": "Friese landen" },
+		{ "href": "#search=sutphen", "label": "Sutphen" },
+		{ "href": "#search=\"aan zee\"", "label": "coastal towns" }
 	],
 	"place_concept": "place concept",
 	"place_concepts": "place concepts",
