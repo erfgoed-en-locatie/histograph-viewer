@@ -128,7 +128,7 @@ module.exports = React.createClass({
   },
 
   getApiUrl: function(queryString) {
-    return this.props.apiUrl + 'search?q=' + queryString.replace(' ', '');
+    return this.props.apiUrl + 'search?q=' + queryString;
   },
 
   parseHash: function (hash) {
