@@ -236,7 +236,7 @@ module.exports = (function () {
 /*!
  * deep-diff.
  * Licensed under the MIT License.
- */ 
+ */
 /*jshint indent:2, laxcomma:true*/
 ;(function (undefined) {
   "use strict";
@@ -2181,7 +2181,7 @@ module.exports = HashWrapper;
           svg.remove();
         }
       }
-      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX, 
+      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX,
       point.y = e.clientY;
       point = point.matrixTransform(container.getScreenCTM().inverse());
       return [ point.x, point.y ];
@@ -2552,7 +2552,7 @@ module.exports = HashWrapper;
     }
     function mousewheeled() {
       var dispatch = event.of(this, arguments);
-      if (mousewheelTimer) clearTimeout(mousewheelTimer); else translate0 = location(center0 = center || d3.mouse(this)), 
+      if (mousewheelTimer) clearTimeout(mousewheelTimer); else translate0 = location(center0 = center || d3.mouse(this)),
       d3_selection_interrupt.call(this), zoomstarted(dispatch);
       mousewheelTimer = setTimeout(function() {
         mousewheelTimer = null;
@@ -2921,7 +2921,7 @@ module.exports = HashWrapper;
   d3.xhr = d3_xhrType(d3_identity);
   function d3_xhrType(response) {
     return function(url, mimeType, callback) {
-      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType, 
+      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType,
       mimeType = null;
       return d3_xhr(url, mimeType, response, callback);
     };
@@ -3759,7 +3759,7 @@ module.exports = HashWrapper;
     return n ? (date.y = d3_time_expandYear(+n[0]), i + n[0].length) : -1;
   }
   function d3_time_parseZone(date, string, i) {
-    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string, 
+    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string,
     i + 5) : -1;
   }
   function d3_time_expandYear(d) {
@@ -3952,7 +3952,7 @@ module.exports = HashWrapper;
     var λ00, φ00, λ0, cosφ0, sinφ0;
     d3_geo_area.point = function(λ, φ) {
       d3_geo_area.point = nextPoint;
-      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4), 
+      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4),
       sinφ0 = Math.sin(φ);
     };
     function nextPoint(λ, φ) {
@@ -5781,7 +5781,7 @@ module.exports = HashWrapper;
       return _ ? center([ -_[1], _[0] ]) : (_ = center(), [ _[1], -_[0] ]);
     };
     projection.rotate = function(_) {
-      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(), 
+      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(),
       [ _[0], _[1], _[2] - 90 ]);
     };
     return rotate([ 0, 0, 90 ]);
@@ -6635,7 +6635,7 @@ module.exports = HashWrapper;
     };
     quadtree.extent = function(_) {
       if (!arguments.length) return x1 == null ? null : [ [ x1, y1 ], [ x2, y2 ] ];
-      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0], 
+      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0],
       y2 = +_[1][1];
       return quadtree;
     };
@@ -8339,7 +8339,7 @@ module.exports = HashWrapper;
         return d3_layout_treemapPad(node, x);
       }
       var type;
-      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ], 
+      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ],
       padConstant) : padConstant;
       return treemap;
     };
@@ -8639,7 +8639,7 @@ module.exports = HashWrapper;
     scale.tickFormat = function(n, format) {
       if (!arguments.length) return d3_scale_logFormat;
       if (arguments.length < 2) format = d3_scale_logFormat; else if (typeof format !== "function") format = d3.format(format);
-      var k = Math.max(.1, n / scale.ticks().length), f = positive ? (e = 1e-12, Math.ceil) : (e = -1e-12, 
+      var k = Math.max(.1, n / scale.ticks().length), f = positive ? (e = 1e-12, Math.ceil) : (e = -1e-12,
       Math.floor), e;
       return function(d) {
         return d / pow(f(log(d) + e)) <= k ? format(d) : "";
@@ -8739,7 +8739,7 @@ module.exports = HashWrapper;
     };
     scale.rangePoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2, 
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2,
       0) : (stop - start) / (domain.length - 1 + padding);
       range = steps(start + step * padding / 2, step);
       rangeBand = 0;
@@ -8751,7 +8751,7 @@ module.exports = HashWrapper;
     };
     scale.rangeRoundPoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2), 
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2),
       0) : (stop - start) / (domain.length - 1 + padding) | 0;
       range = steps(start + Math.round(step * padding / 2 + (stop - start - (domain.length - 1 + padding) * step) / 2), step);
       rangeBand = 0;
@@ -9174,7 +9174,7 @@ module.exports = HashWrapper;
     return points.length < 4 ? d3_svg_lineLinear(points) : points[1] + d3_svg_lineHermite(points.slice(1, -1), d3_svg_lineCardinalTangents(points, tension));
   }
   function d3_svg_lineCardinalClosed(points, tension) {
-    return points.length < 3 ? d3_svg_lineLinear(points) : points[0] + d3_svg_lineHermite((points.push(points[0]), 
+    return points.length < 3 ? d3_svg_lineLinear(points) : points[0] + d3_svg_lineHermite((points.push(points[0]),
     points), d3_svg_lineCardinalTangents([ points[points.length - 2] ].concat(points, [ points[1] ]), tension));
   }
   function d3_svg_lineCardinal(points, tension) {
@@ -9932,7 +9932,7 @@ module.exports = HashWrapper;
         var g = d3.select(this);
         var scale0 = this.__chart__ || scale, scale1 = this.__chart__ = scale.copy();
         var ticks = tickValues == null ? scale1.ticks ? scale1.ticks.apply(scale1, tickArguments_) : scale1.domain() : tickValues, tickFormat = tickFormat_ == null ? scale1.tickFormat ? scale1.tickFormat.apply(scale1, tickArguments_) : d3_identity : tickFormat_, tick = g.selectAll(".tick").data(ticks, scale1), tickEnter = tick.enter().insert("g", ".domain").attr("class", "tick").style("opacity", ε), tickExit = d3.transition(tick.exit()).style("opacity", ε).remove(), tickUpdate = d3.transition(tick.order()).style("opacity", 1), tickSpacing = Math.max(innerTickSize, 0) + tickPadding, tickTransform;
-        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"), 
+        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"),
         d3.transition(path));
         tickEnter.append("line");
         tickEnter.append("text");
@@ -41108,19 +41108,19 @@ module.exports = React.createClass({displayName: "exports",
 
   render: function() {
     return (
-      React.createElement("div", null, 
-        React.createElement("div", {id: "sidebar-container", className: "box-container", ref: "container"}, 
-          React.createElement("div", {className: "box-container-padding"}, 
-            React.createElement("div", {id: "search-box", className: "box padding"}, 
-              React.createElement("a", {href: "http://histograph.io/"}, React.createElement("img", {src: "images/histograph.svg"})), 
-              React.createElement("input", {type: "search", placeholder: language.search_placeholder, 
+      React.createElement("div", null,
+        React.createElement("div", {id: "sidebar-container", className: "box-container", ref: "container"},
+          React.createElement("div", {className: "box-container-padding"},
+            React.createElement("div", {id: "search-box", className: "box padding"},
+              React.createElement("a", {href: "http://histograph.io/"}, React.createElement("img", {src: "images/histograph.svg"})),
+              React.createElement("input", {type: "search", placeholder: language.search_placeholder,
                   onKeyDown: this.search, ref: "searchInput"})
-            ), 
+            ),
             React.createElement(Results, {geojson: this.state.geojson, route: this.state.route, ref: "results", map: this.refs.map})
           )
-        ), 
-        React.createElement(SearchOptions, null), 
-        React.createElement(Map, {route: this.state.route, sidebarWidth: this.state.sidebarWidth, ref: "map"}), 
+        ),
+        React.createElement(SearchOptions, null),
+        React.createElement(Map, {route: this.state.route, sidebarWidth: this.state.sidebarWidth, ref: "map"}),
         React.createElement(Graph, {toggleLeafs: this.toggleLeafs, showLeafs: this.state.showLeafs, geojson: this.state.geojson, route: this.state.route, ref: "graph"})
       )
     );
@@ -41200,7 +41200,7 @@ module.exports = React.createClass({displayName: "exports",
   },
 
   getApiUrl: function(queryString) {
-    return this.props.apiUrl + 'search?q=' + queryString.replace(' ', '');
+    return this.props.apiUrl + 'search?q=' + queryString;
   },
 
   parseHash: function (hash) {
@@ -41375,7 +41375,7 @@ module.exports = React.createClass({displayName: "exports",
     }
 
     var pits = filteredPits.map(function(pit, index) {
-      return React.createElement(Pit, {key: pit.hgid, pit: pit, feature: this.props.feature, index: index, 
+      return React.createElement(Pit, {key: pit.hgid, pit: pit, feature: this.props.feature, index: index,
           ref: 'item' + index});
     }.bind(this));
 
@@ -41407,71 +41407,71 @@ module.exports = React.createClass({displayName: "exports",
 
 
     return (
-      React.createElement("div", null, 
-        React.createElement("div", {className: "side-padding"}, 
-          React.createElement("table", null, 
-            React.createElement("tbody", null, 
-              React.createElement("tr", null, 
-                React.createElement("td", {className: "label"},  language.Data), 
-                React.createElement("td", {className: "links"}, 
+      React.createElement("div", null,
+        React.createElement("div", {className: "side-padding"},
+          React.createElement("table", null,
+            React.createElement("tbody", null,
+              React.createElement("tr", null,
+                React.createElement("td", {className: "label"},  language.Data),
+                React.createElement("td", {className: "links"},
                   this.state.links
                 )
-              ), 
+              ),
 
-              React.createElement("tr", null, 
-                React.createElement("td", {className: "label"},  language.Concept), 
-                React.createElement("td", null, 
+              React.createElement("tr", null,
+                React.createElement("td", {className: "label"},  language.Concept),
+                React.createElement("td", null,
                    pitsCount, " ",  language.place, " ", language.names, ", ",  relationsCount, " ", language.relations, " (", React.createElement("a", {href: "javascript:void(0)", onClick: this.showGraph},  this.state.graphHidden ? language.hide : language.show, " ",  language.graph), ")"
                 )
-              ), 
+              ),
 
-              React.createElement("tr", {style: {display: 'none'}}, 
-                React.createElement("td", {className: "label"},  language.Filters), 
-                React.createElement("td", null, 
+              React.createElement("tr", {style: {display: 'none'}},
+                React.createElement("td", {className: "label"},  language.Filters),
+                React.createElement("td", null,
                   React.createElement("a", {href: "javascript:void(0)"},  language.filter_place_names)
                 )
               )
 
-            ), 
-            React.createElement("tbody", {className: "hidden indent"}, 
-              React.createElement("tr", null, 
-                React.createElement("td", {className: "label"},  language.Names), 
-                React.createElement("td", null, 
+            ),
+            React.createElement("tbody", {className: "hidden indent"},
+              React.createElement("tr", null,
+                React.createElement("td", {className: "label"},  language.Names),
+                React.createElement("td", null,
                   React.createElement("input", {type: "search", placeholder:  language.filter_names, id: "pit-name-filter", onChange: this.filterName})
                 )
-              ), 
-              React.createElement("tr", null, 
-                React.createElement("td", {className: "label"},  language.Sources), 
-                React.createElement("td", null, 
-                  React.createElement("span", {className: "source-list"}, 
+              ),
+              React.createElement("tr", null,
+                React.createElement("td", {className: "label"},  language.Sources),
+                React.createElement("td", null,
+                  React.createElement("span", {className: "source-list"},
                     this.props.sources.map(function(source, index) {
                       var boundFilterSource = this.filterSource.bind(this, source),
                           className = this.state.filters.sources[source] ? "" : "filtered";
-                      return React.createElement("span", {key: source}, React.createElement("a", {className: className, href: "#", 
+                      return React.createElement("span", {key: source}, React.createElement("a", {className: className, href: "#",
                                 onClick: boundFilterSource}, React.createElement("code", null, source)), " ");
                     }.bind(this))
                   )
                 )
-              ), 
+              ),
 
-              React.createElement("tr", null, 
-                React.createElement("td", {className: "label"},  language.Geom), 
-                React.createElement("td", null, 
-                  React.createElement("span", {className: "geometry-type-list"}, 
+              React.createElement("tr", null,
+                React.createElement("td", {className: "label"},  language.Geom),
+                React.createElement("td", null,
+                  React.createElement("span", {className: "geometry-type-list"},
                     Object.keys(this.state.filters.geometryTypes).map(function(geometryType, index) {
                       var boundFilterGeometryType = this.filterGeometryType.bind(this, geometryType),
                           //geometry-type
                           className = this.state.filters.geometryTypes[geometryType] ? "" : "filtered";
-                      return React.createElement("span", {key: geometryType}, React.createElement("a", {className: className, href: "#", 
+                      return React.createElement("span", {key: geometryType}, React.createElement("a", {className: className, href: "#",
                                 onClick: boundFilterGeometryType}, geometryType));
                     }.bind(this))
                   )
                 )
-              ), 
+              ),
 
-              React.createElement("tr", null, 
-                React.createElement("td", {className: "label"},  language.Sort), 
-                React.createElement("td", {className: "sort-fields"}, 
+              React.createElement("tr", null,
+                React.createElement("td", {className: "label"},  language.Sort),
+                React.createElement("td", {className: "sort-fields"},
                   this.state.sortFields.map(function(field, index) {
                     var boundSort = this.sort.bind(this, field),
                         className = this.state.sortField === field ? "selected" : "";
@@ -41480,13 +41480,13 @@ module.exports = React.createClass({displayName: "exports",
                 )
               )
             )
-          ), 
-          React.createElement("p", null, 
+          ),
+          React.createElement("p", null,
             filterMessage
           )
-        ), 
+        ),
 
-        React.createElement("ol", {id: "pits", className: "list"}, 
+        React.createElement("ol", {id: "pits", className: "list"},
           pits
         )
 
@@ -41928,37 +41928,37 @@ var language = languages.english;
 module.exports = React.createClass({displayName: "exports",
   render: function() {
     return (
-      React.createElement("div", {className: "side-padding"}, 
-        React.createElement("table", null, 
-          React.createElement("tbody", null, 
-            React.createElement("tr", null, 
-              React.createElement("td", {className: "label"}, "Names"), 
-              React.createElement("td", null, 
-                React.createElement("span", null, 
+      React.createElement("div", {className: "side-padding"},
+        React.createElement("table", null,
+          React.createElement("tbody", null,
+            React.createElement("tr", null,
+              React.createElement("td", {className: "label"}, "Names"),
+              React.createElement("td", null,
+                React.createElement("span", null,
                   this.props.names.selected.map(function(name, index) {
                     return React.createElement("span", {key: index, className: "concept-alt-name"}, name);
                   })
-                ), 
+                ),
                 React.createElement("span", null, this.props.names.suffix)
               )
-            ), 
-            React.createElement("tr", null, 
-              React.createElement("td", {className: "label"}, "Sources"), 
-              React.createElement("td", null, 
-                React.createElement("span", {className: "source-list"}, 
+            ),
+            React.createElement("tr", null,
+              React.createElement("td", {className: "label"}, "Sources"),
+              React.createElement("td", null,
+                React.createElement("span", {className: "source-list"},
                   this.props.sources.map(function(source, index) {
                     return React.createElement("span", {key: index}, source);
                   })
                 )
               )
-            ), 
-            React.createElement("tr", null, 
-              React.createElement("td", {colSpan: "2"}, 
+            ),
+            React.createElement("tr", null,
+              React.createElement("td", {colSpan: "2"},
                 React.createElement("a", {className: "show-details", onClick: this.props.showDetails, title: language.show_concept_details, href: "javascript:void(0)"},  language.show_details)
               )
             )
           )
-        ), 
+        ),
         React.createElement("div", {className: "clear"})
       )
     );
@@ -42041,21 +42041,21 @@ module.exports = React.createClass({displayName: "exports",
 
     var conceptContent;
     if (selected == -1) {
-      conceptContent = React.createElement(ConceptSimple, {sources: this.state.sources, names: this.state.names, 
+      conceptContent = React.createElement(ConceptSimple, {sources: this.state.sources, names: this.state.names,
           type: this.props.feature.properties.type, showDetails: this.details});
     } else {
-      conceptContent = React.createElement(ConceptDetails, {sources: this.state.sources, names: this.state.names, 
+      conceptContent = React.createElement(ConceptDetails, {sources: this.state.sources, names: this.state.names,
           feature: this.props.feature, route: this.props.route});
     }
 
     return (
-      React.createElement("li", {className: className, onClick: this.zoom, onMouseEnter: this.mouseEnter, onMouseLeave: this.mouseLeave}, 
-        React.createElement("div", {className: "side-padding"}, 
-          React.createElement("h5", null, 
-            React.createElement("span", null, this.state.names.name), 
+      React.createElement("li", {className: className, onClick: this.zoom, onMouseEnter: this.mouseEnter, onMouseLeave: this.mouseLeave},
+        React.createElement("div", {className: "side-padding"},
+          React.createElement("h5", null,
+            React.createElement("span", null, this.state.names.name),
             React.createElement("span", {className: "type-header"}, this.props.feature.properties.type.replace("hg:", ""))
           )
-        ), 
+        ),
         conceptContent
       )
     );
@@ -42233,9 +42233,9 @@ module.exports = React.createClass({displayName: "exports",
     }
 
     return (
-      React.createElement("div", {className: className}, 
-        React.createElement(Message, {message: message, onMessageClose: this.messageClose, closeText: closeText}), 
-        React.createElement("ol", {id: "concepts", className: "list"}, 
+      React.createElement("div", {className: className},
+        React.createElement(Message, {message: message, onMessageClose: this.messageClose, closeText: closeText}),
+        React.createElement("ol", {id: "concepts", className: "list"},
           geojson.features.map(function(feature, index) {
             if (selectedConcept == -1 || selectedConcept == index) {
               // Compute subgraph key from hgids
@@ -42244,7 +42244,7 @@ module.exports = React.createClass({displayName: "exports",
                   .join(",")
                   .hashCode();
 
-              return React.createElement(Concept, {key: key, route: this.props.route, 
+              return React.createElement(Concept, {key: key, route: this.props.route,
                   feature: this.props.geojson.features[index], map: this.props.map, index: index});
 
               // <ConceptsBoxList features={this.props.geojson.features} featureGroups={this.state.featureGroups}
@@ -42371,16 +42371,16 @@ module.exports = React.createClass({displayName: "exports",
     if(!this.checkNeccesary()){
       return null;
     }
-    
+
     return (
-      React.createElement("div", {id: "graph-container", className: "box-container"}, 
-        React.createElement("div", {className: "box-container-padding"}, 
-          React.createElement("div", {id: "graph-box", className: "box"}, 
-            React.createElement("button", {onClick: this.props.toggleLeafs}, this.props.showLeafs ? 'Show leafs' : 'Hide leafs'), 
-            React.createElement("svg", {id: "graph"}, 
-              React.createElement("defs", null, 
-                React.createElement("marker", {id: "marker-arrow", orient: "auto", markerWidth: "8", markerHeight: "8", 
-                    refX: "12", refY: "4"}, 
+      React.createElement("div", {id: "graph-container", className: "box-container"},
+        React.createElement("div", {className: "box-container-padding"},
+          React.createElement("div", {id: "graph-box", className: "box"},
+            React.createElement("button", {onClick: this.props.toggleLeafs}, this.props.showLeafs ? 'Show leafs' : 'Hide leafs'),
+            React.createElement("svg", {id: "graph"},
+              React.createElement("defs", null,
+                React.createElement("marker", {id: "marker-arrow", orient: "auto", markerWidth: "8", markerHeight: "8",
+                    refX: "12", refY: "4"},
                   React.createElement("path", {d: "M0,0 V8 L8,4 Z"})
                 )
               )
@@ -42397,11 +42397,11 @@ module.exports = React.createClass({displayName: "exports",
     if(!this.checkNeccesary()){
       return null;
     }
-    
+
     feature = this.props.geojson.features[this.props.route.getValue().concept.selected];
 
     var graphContainer = document.querySelectorAll("#graph-container > div")[0];
-    
+
     d3.select("#graph")
         .datum(feature)
         .call(createNodeGraph, graphContainer, this);
@@ -42709,8 +42709,8 @@ module.exports = React.createClass({displayName: "exports",
     var closeText = this.props && this.props.closeText || language.Close;
 
     return (
-      React.createElement("div", {id: "concepts-results", className: "padding results"}, 
-        React.createElement("span", {id: "concepts-results-message"}, this.props.message), 
+      React.createElement("div", {id: "concepts-results", className: "padding results"},
+        React.createElement("span", {id: "concepts-results-message"}, this.props.message),
         React.createElement("a", {id: "concepts-close", className: "float-right", href: "#", onClick: this.closeClick}, closeText)
       )
     );
@@ -42792,19 +42792,19 @@ module.exports = React.createClass({displayName: "exports",
     var className = 'padding pit';// + (!this.state.selected &! this.state.unfade ? ' faded' : '');
 
     return (
-      React.createElement("li", {className: className}, 
-        React.createElement("h6", null, React.createElement("span", {className: "place-name"}, pit.name), geometrySpan), 
-        React.createElement("div", null, 
-          React.createElement("table", null, 
-            React.createElement("tbody", null, 
-              React.createElement("tr", null, 
-                React.createElement("td", {className: "label"}, "ID"), 
+      React.createElement("li", {className: className},
+        React.createElement("h6", null, React.createElement("span", {className: "place-name"}, pit.name), geometrySpan),
+        React.createElement("div", null,
+          React.createElement("table", null,
+            React.createElement("tbody", null,
+              React.createElement("tr", null,
+                React.createElement("td", {className: "label"}, "ID"),
                 React.createElement("td", null, React.createElement("code", null, pit.hgid))
-              ), 
-              uriRow, 
+              ),
+              uriRow,
               periodRow
             )
-          ), 
+          ),
           React.createElement("div", {className: "clear"})
         )
       )
@@ -42840,14 +42840,14 @@ module.exports = React.createClass({displayName: "exports",
     if (geojson && geojson.features) {
       if (geojson.features.length > 0) {
         return (
-          React.createElement("div", {className: "box list-box", id: "concepts-box"}, 
+          React.createElement("div", {className: "box list-box", id: "concepts-box"},
             React.createElement(ConceptList, {geojson: this.props.geojson, map: this.props.map, route: this.props.route})
           )
         );
       } else {
         if (!this.props.route.hidden.getValue()) {
           return (
-            React.createElement("div", {className: "box list-box"}, 
+            React.createElement("div", {className: "box list-box"},
               React.createElement(Message, {message:  language.no_concepts_found, error: true, onMessageClose: this.messageClose})
             )
           );
@@ -42857,8 +42857,8 @@ module.exports = React.createClass({displayName: "exports",
       }
     } else {
       return (
-        React.createElement("div", {className: "box padding"}, 
-          React.createElement("p", null,  language.explanation), 
+        React.createElement("div", {className: "box padding"},
+          React.createElement("p", null,  language.explanation),
           React.createElement("p", {className: "examples"},  language.queryExamplesIntro, ": ", examples)
         )
       );
@@ -42888,12 +42888,12 @@ module.exports = React.createClass({displayName: "exports",
   render: function() {
     return false;
     return (
-      React.createElement("div", {id: "options-container", className: "box-container"}, 
-        React.createElement("div", {className: "box-container-padding"}, 
-          React.createElement("button", {className: "box", onClick: this.toggle},  this.state.enabled ? 'Disable' : 'Enable', " advanced searching"), 
+      React.createElement("div", {id: "options-container", className: "box-container"},
+        React.createElement("div", {className: "box-container-padding"},
+          React.createElement("button", {className: "box", onClick: this.toggle},  this.state.enabled ? 'Disable' : 'Enable', " advanced searching"),
            ( this.state.enabled ?
-            React.createElement("div", {id: "search-options", className: "box padding"}, 
-             React.createElement("label", null, "from year: ", this.state.fromDate), React.createElement("input", {type: "range", min: "0", max: new Date().getFullYear(), value: this.state.fromDate, onChange: this.getStateChanger.call(this, 'fromDate', 'untilDate')}), 
+            React.createElement("div", {id: "search-options", className: "box padding"},
+             React.createElement("label", null, "from year: ", this.state.fromDate), React.createElement("input", {type: "range", min: "0", max: new Date().getFullYear(), value: this.state.fromDate, onChange: this.getStateChanger.call(this, 'fromDate', 'untilDate')}),
              React.createElement("label", null, "until year: ", this.state.untilDate), React.createElement("input", {type: "range", min: "0", max: new Date().getFullYear(), value: this.state.untilDate, onChange: this.getStateChanger.call(this, 'untilDate', 'fromDate')})
             )
           :
