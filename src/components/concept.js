@@ -299,24 +299,11 @@ module.exports = React.createClass({
 
   addLayer: function() {
     this.props.map.getConceptLayer().addLayer(this.featureGroup);
-    // this.featureGroup.getLayers().forEach(function(layer) {
-    //   var hgid = layer.getLayers()[0].feature.properties.hgid;
-    //   this.props.pitLayers[hgid] = {
-    //     layer: layer,
-    //     featureGroup: this.featureGroup
-    //   };
-    // }.bind(this));
   },
 
   removeLayer: function() {
     // // Remove item's GeoJSON layer from Leaflet map
     this.props.map.getConceptLayer().removeLayer(this.featureGroup);
-
-
-    // this.featureGroup.getLayers().forEach(function(layer) {
-    //   var hgid = layer.getLayers()[0].feature.properties.hgid;
-    //   delete this.props.pitLayers[hgid];
-    // }.bind(this));
   },
 
   componentWillUnmount: function() {
