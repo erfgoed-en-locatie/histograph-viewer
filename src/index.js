@@ -11,6 +11,22 @@ var languages = {
 
 var el = document.getElementById('app');
 
+var colorSelectors = {
+  'h5': 'border-bottom-color',
+  'h6': 'border-bottom-color',
+  '.graph-pit.has-geometry': 'fill',
+  'td.links a:hover': 'color',
+  'input[type="search"]:focus': 'border-color'
+};
+
+var sheet = document.createElement('style');
+var css = '';
+Object.keys(colorSelectors).forEach(function(selector) {
+  css += selector + ' {' + colorSelectors[selector] + ': ' + config.viewer.color + ';}\n';
+});
+sheet.innerHTML = css;
+document.body.appendChild(sheet);
+
 React.render(<App config={config} language={languages[config.viewer.language]} />, el);
 
 Array.prototype.unique = function() {

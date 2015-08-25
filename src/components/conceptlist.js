@@ -5,28 +5,23 @@ var Message = require('./message');
 
 module.exports = React.createClass({
 
-  getInitialState: function() {
-    return {
-      featuresWithGeometry: this.props.geojson.features.filter(function(feature) {
-        return feature.geometry.geometries.length;
-      }),
-      featuresWithoutGeometry: this.props.geojson.features.filter(function(feature) {
-        return !feature.geometry.geometries.length;
-      })
-    };
-  },
-
   render: function() {
+    var geojson = this.props.route.geojson.getValue();
+    var featuresWithGeometry = geojson.features.filter(function(feature) {
+      return feature.geometry.geometries.length;
+    });
+    var featuresWithoutGeometry = geojson.features.filter(function(feature) {
+      return !feature.geometry.geometries.length;
+    });
     var selectedConcept = this.props.route.concept.selected.getValue();
-    var geojson = this.props.geojson;
     var message;
     var closeText;
     if (selectedConcept == -1) {
       if (geojson.features && geojson.features.length) {
         var concept = geojson.features.length == 1 ? this.props.language.placeConcept : this.props.language.placeConcepts;
         var message = geojson.features.length + ' ' + concept + ' ' + this.props.language.found;
-        if (this.state.featuresWithoutGeometry.length) {
-          message += ' (' + this.state.featuresWithoutGeometry.length + ' ' + this.props.language.withoutGeometry + ')';
+        if (featuresWithoutGeometry.length) {
+          message += ' (' + featuresWithoutGeometry.length + ' ' + this.props.language.withoutGeometry + ')';
         }
         message += ':';
       } else if (this.props.error) {
@@ -48,9 +43,9 @@ module.exports = React.createClass({
       <div className={className}>
         <Message language={this.props.language} message={message} onMessageClose={this.messageClose} closeText={closeText} />
         <ol id='concepts' className="list">
-          {this.state.featuresWithGeometry.map(function(feature, index) {
+          {featuresWithGeometry.map(function(feature, index) {
             if (selectedConcept == -1 || selectedConcept == index) {
-              // Compute subgraph key from hgids
+              // Compute concept key from ids/uris
               var key = feature.properties.pits
                   .map(function(pit) {return pit.id || pit.uri; })
                   .join(',')
@@ -58,18 +53,6 @@ module.exports = React.createClass({
 
               return <Concept config={this.props.config} language={this.props.language} key={key} route={this.props.route}
                   feature={feature} map={this.props.map} index={index} />;
-
-              // <ConceptsBoxList features={this.props.geojson.features} featureGroups={this.state.featureGroups}
-              //   pitLayers={this.state.pitLayers} onSelect={this.handleSelect}/>
-
-
-              // var boundSelect = this.handleSelect.bind(this, index),
-              //     boundUpdateOtherConcepts = this.updateOtherConcepts.bind(this, index);
-
-              // return <ConceptsBoxListItem key={key} feature={feature} index={index}
-              //     featureGroups={this.props.featureGroups} pitLayers={this.props.pitLayers}
-              //     onSelect={boundSelect} ref={'item' + index}
-              //     updateOtherConcepts={boundUpdateOtherConcepts}/>;
             }
           }.bind(this))}
         </ol>

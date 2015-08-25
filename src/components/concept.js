@@ -44,7 +44,7 @@ module.exports = React.createClass({
     if (selectedNames.length > 1) {
       var namesLengthDiff = sortedNames.length - selectedNames.length;
       var namesPlurSing = namesLengthDiff == 1 ? this.props.language.name : this.props.language.names;
-      selectedNamesSuffix = sortedNames.length > selectedNames.length ? ' ' + this.props.language.and + ' ' + namesLengthDiff + ' ' + this.props.language.other + " " +  namesPlurSing : '';
+      selectedNamesSuffix = sortedNames.length > selectedNames.length ? ' ' + this.props.language.and + ' ' + namesLengthDiff + ' ' + this.props.language.other + " " +  namesPlurSing.toLowerCase() : '';
     }
 
     var datasets = feature.properties.pits
@@ -56,6 +56,8 @@ module.exports = React.createClass({
       })
       .unique();
 
+    var color = this.props.config.viewer.color;
+
     return {
       datasets: datasets,
       names: {
@@ -64,7 +66,62 @@ module.exports = React.createClass({
         names: sortedNames,
         selected: selectedNames,
         suffix: selectedNamesSuffix
-      }
+      },
+      defaultStyle: {
+        point: {
+          color: color,
+          fillColor: color,
+          radius: 9,
+          opacity: 0.95
+        },
+        line: {
+          color: color,
+          weight: 3,
+          opacity: 0.95,
+          fillOpacity: 0.05
+        }
+      },
+      fadedStyle: {
+        point: {
+          color: color,
+          fillColor: color,
+          radius: 7,
+          opacity: 0.25
+        },
+        line: {
+          color: color,
+          weight: 2,
+          opacity: 0.25,
+          fillOpacity: 0
+        }
+      },
+      linkFormatters: [
+        {
+          title: 'API',
+          format: function(apiUrl, id) {
+            return apiUrl;
+          }
+        },
+        {
+          title: 'GeoThesaurus',
+          default: true,
+          format: function(apiUrl, id) {
+            return 'http://geothesaurus.nl/hgconcept/frompit/' + id;
+          }
+        },
+        {
+          title: 'JSON-LD',
+          format: function(apiUrl, id) {
+            return 'http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=' + apiUrl;
+          }
+        },
+        {
+          title: 'geojson.io',
+          format: function(apiUrl, id) {
+            return 'http://geojson.io/#data=data:text/x-url,' + encodeURIComponent(apiUrl);
+          }
+        }
+      ]
     };
   },
 
@@ -103,7 +160,7 @@ module.exports = React.createClass({
       conceptContent = <ConceptSimple config={this.props.config} language={this.props.language} datasets={this.state.datasets} names={this.state.names}
           type={this.props.feature.properties.type} showDetails={this.details} />;
     } else {
-      conceptContent = <ConceptDetails config={this.props.config} language={this.props.language} datasets={this.state.datasets} names={this.state.names}
+      conceptContent = <ConceptDetails config={this.props.config} language={this.props.language} datasets={this.state.datasets} names={this.state.names} linkFormatters={this.state.linkFormatters}
           feature={this.props.feature} route={this.props.route} />;
     }
 
@@ -132,8 +189,19 @@ module.exports = React.createClass({
   },
 
   details: function() {
-    this.props.map.fitBounds(this.featureGroup.getBounds());
-    this.props.route.concept.selected.set(this.props.index);
+    if (this.props.config.viewer.mode === 'simple') {
+      var linkFormatter = this.state.linkFormatters.filter(function(linkFormatter) {
+        return linkFormatter.default;
+      })[0];
+
+      var firstPit = this.props.feature.properties.pits[0];
+      var firstId = firstPit.id || firstPit.uri;
+      var apiUrl = this.props.config.api.baseUrl + 'search?q=' + firstId;
+      window.location.href = linkFormatter.format(apiUrl, firstId);
+    } else {
+      this.props.map.fitBounds(this.featureGroup.getBounds());
+      this.props.route.concept.selected.set(this.props.index);
+    }
   },
 
   zoom: function(params) {
@@ -142,6 +210,10 @@ module.exports = React.createClass({
   },
 
   componentDidMount: function() {
+    var geometryTypeOrder = [
+      'Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon', 'GeometryCollection'
+    ];
+
     var feature = this.props.feature;
 
     this.featureGroup = L.featureGroup();
@@ -160,7 +232,7 @@ module.exports = React.createClass({
       }
 
       return {
-        type: "Feature",
+        type: 'Feature',
         properties: {
           conceptIndex: this.props.index,
           geometryIndex: geometryIndex,
@@ -176,10 +248,10 @@ module.exports = React.createClass({
     .forEach(function(feature) {
       var geojson = L.geoJson(feature, {
         geometryType: feature.geometry.type,
-        style: defaultStyle.line,
+        style: this.state.defaultStyle.line,
         pointToLayer: function (feature, latlng) {
-          return L.circleMarker(latlng, defaultStyle.point);
-        },
+          return L.circleMarker(latlng, this.state.defaultStyle.point);
+        }.bind(this),
         onEachFeature: function(feature, layer) {
           // layer.on('mouseover', function(e) {
           //   this.props.route.concept.highlighted.set(feature.properties.conceptIndex);
@@ -218,11 +290,11 @@ module.exports = React.createClass({
       //
       // }
       if (highlight) {
-        layer.setStyle(defaultStyle.line);
+        layer.setStyle(this.state.defaultStyle.line);
       } else {
-        layer.setStyle(fadedStyle.line);
+        layer.setStyle(this.state.fadedStyle.line);
       }
-    });
+    }.bind(this));
   },
 
   addLayer: function() {

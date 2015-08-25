@@ -1,38 +1,6 @@
 var React = require('react');
 var Pit = require('./pit');
 
-var linkFormatters = {
-  histograph: function(apiUrl, id){ return apiUrl },
-  geothesaurus: function(apiUrl, id){ return 'http://geothesaurus.nl/hgconcept/frompit/' + id; },
-  jsonld: function(apiUrl, id){ return "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl; },
-  geojson: function(apiUrl, id){ return "http://geojson.io/#data=data:text/x-url, " + encodeURIComponent(apiUrl); }
-};
-
-var linkLabels = {
-  histograph: 'API',
-  geothesaurus: 'GeoThesaurus',
-  jsonld: 'JSON-LD',
-  geojson: 'geojson.io'
-};
-
-function getLinks(feature, apiUrl, id, linksWanted){
-  var links = [];
-
-  linksWanted.forEach(function(value) {
-    if(!linkFormatters[value]){
-      throw(new Error('getLinks:linkFormatterNotFound:' + value));
-    }
-
-    links.push({ label: linkLabels[value], href: linkFormatters[value](apiUrl, id) });
-  });
-
-  return links;
-}
-
-function transformToAnchor(a){
-  return <span><a href={a.href}>{a.label}</a></span>;
-}
-
 module.exports = React.createClass({
 
   getInitialState: function() {
@@ -54,14 +22,11 @@ module.exports = React.createClass({
     var apiUrl = this.props.config.api.baseUrl + 'search?q=' + firstId;
 
     return {
-      links: getLinks(this.props.feature, apiUrl, firstId, ['histograph', 'geothesaurus', 'jsonld', 'geojson']).map(transformToAnchor),
+      links: this.getLinks(apiUrl, firstId).map(this.transformToAnchor),
       loop: {
         index: 0,
         timer: null,
         delay: 800
-      },
-      ids: {
-
       },
       filters: {
         datasets: datasets,
@@ -250,9 +215,18 @@ module.exports = React.createClass({
     );
   },
 
+  getLinks: function(apiUrl, id) {
+    return this.props.linkFormatters.map(function(linkFormatter) {
+      return {
+        title: linkFormatter.title,
+        href: linkFormatter.format(apiUrl, id)
+      };
+    });
+  },
 
-
-
+  transformToAnchor: function(a) {
+    return <span><a href={a.href}>{a.title}</a></span>;
+  },
 
   sort: function(field, event) {
     this.state.sortField = field;

@@ -13,8 +13,8 @@ module.exports = React.createClass({
   getInitialState: function() {
     return {
       sidebarWidth: 450,
-      geojson: null,
       route: new Cortex({
+        geojson: null,
         hidden: false
       }, function(updatedRoute) {
         this.setState({
@@ -25,21 +25,33 @@ module.exports = React.createClass({
   },
 
   render: function() {
+    var logo;
+    var inputStyle = {
+       width: '100%'
+    };
+
+    if (this.props.config.viewer.logo) {
+      logo = (<a href='http://histograph.io/'><img width='44px' src={this.props.config.viewer.logo} /></a>);
+      inputStyle = {
+        width: 'calc(100% - 52px)'
+      }
+    }
+
     return (
       <div>
         <div id='sidebar-container' className='box-container' ref='container'>
           <div className='box-container-padding'>
             <div id='search-box' className='box padding'>
-              <a href='http://histograph.io/'><img src='images/histograph.svg' /></a>
-              <input type='search' placeholder={this.props.language.searchPlaceholder}
+              {logo}
+              <input style={inputStyle} type='search' placeholder={this.props.language.searchPlaceholder}
                   onKeyDown={this.search} ref='searchInput' />
             </div>
-            <Results config={this.props.config} language={this.props.language} geojson={this.state.geojson} route={this.state.route} ref='results' map={this.refs.map} />
+            <Results config={this.props.config} language={this.props.language} route={this.state.route} ref='results' map={this.refs.map} />
           </div>
         </div>
         <SearchOptions />
         <Map route={this.state.route} sidebarWidth={this.state.sidebarWidth} ref='map' />
-        <Graph toggleLeafs={this.toggleLeafs} showLeafs={this.state.showLeafs} geojson={this.state.geojson} route={this.state.route} ref='graph' />
+        <Graph toggleLeafs={this.toggleLeafs} showLeafs={this.state.showLeafs} route={this.state.route} ref='graph' />
       </div>
     );
   },
@@ -70,9 +82,7 @@ module.exports = React.createClass({
     if (event.keyCode == 13) {
       var value = React.findDOMNode(this.refs.searchInput).value;
       // TODO: hash! react router?
-      //setHash('search=' + value);
       this.callApi(value);
-
       this.setHash('search=' + value);
     }
   },
@@ -90,6 +100,7 @@ module.exports = React.createClass({
       // TODO: use errorMessage
 
       var route = {
+        geojson: geojson,
         error: errorMessage,
         fitBounds: true,
         search: query,
@@ -103,8 +114,6 @@ module.exports = React.createClass({
           highlighted: -1
         }
       };
-
-      this.state.geojson = geojson;
       this.state.route.set(route);
     }.bind(this));
   },
@@ -124,7 +133,7 @@ module.exports = React.createClass({
   parseHash: function (hash) {
     var params = {};
     decodeURIComponent(hash).split('&').forEach(function(param) {
-      if (param.indexOf("=") > -1) {
+      if (param.indexOf('=') > -1) {
         var kv = param.split('=');
         params[kv[0]] = kv.slice(1).join('=');
       }
@@ -143,7 +152,7 @@ module.exports = React.createClass({
   setHash: function(hash){
     disableHashChange = true;
     location.hash = hash;
-    setTimeout(function(){
+    setTimeout(function() {
       disableHashChange = false;
     }, 1000);
   }
