@@ -1,6 +1,6 @@
 var React = require('react');
 var Results = require('./components/results');
-var SearchOptions = require('./components/search-options');
+// var SearchOptions = require('./components/search-options');
 var Map = require('./components/map');
 var Graph = require('./components/graph');
 var d3 = require('d3');
@@ -52,7 +52,6 @@ module.exports = React.createClass({
             <Results config={this.props.config} language={this.props.language} route={this.state.route} ref='results' map={this.refs.map} />
           </div>
         </div>
-        <SearchOptions />
         <Map route={this.state.route} sidebarWidth={this.state.sidebarWidth} ref='map' />
         <Graph toggleLeafs={this.toggleLeafs} showLeafs={this.state.showLeafs} route={this.state.route} ref='graph' />
       </div>
