@@ -8,7 +8,7 @@
     "d3": "^3.5.5",
     "leaflet": "^0.7.3",
     "react": "^0.13.1",
-    "webcola": "^0.1.1"
+    "webcola": "^3.1.2"
   },
   "devDependencies": {
     "eslint": "^0.16.2",
