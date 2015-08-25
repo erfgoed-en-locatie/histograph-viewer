@@ -1,40 +1,29 @@
-'use strict';
-
 var React = require('react');
 var Pit = require('./pit');
 
-var languages = {
-  english: require('../language/english.json'),
-  dutch: require('../language/dutch.json')
+var linkFormatters = {
+  histograph: function(apiUrl, id){ return apiUrl },
+  geothesaurus: function(apiUrl, id){ return 'http://geothesaurus.nl/hgconcept/frompit/' + id; },
+  jsonld: function(apiUrl, id){ return "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl; },
+  geojson: function(apiUrl, id){ return "http://geojson.io/#data=data:text/x-url, " + encodeURIComponent(apiUrl); }
 };
 
-var language = languages.english;
-//language = languages.dutch;
+var linkLabels = {
+  histograph: 'API',
+  geothesaurus: 'GeoThesaurus',
+  jsonld: 'JSON-LD',
+  geojson: 'geojson.io'
+};
 
-var linkFormatters = {
-      histograph: function(apiUrl, firstHgid){ return apiUrl },
-      geothesaurus: function(apiUrl, firstHgid){ return 'http://geothesaurus.nl/hgconcept/frompit/' + firstHgid; },
-      jsonld: function(apiUrl, firstHgid){ return "http://json-ld.org/playground/index.html#startTab=tab-normalized&json-ld=" + apiUrl; },
-      geojson: function(apiUrl, firstHgid){ return "http://geojson.io/#data=data:text/x-url, " + encodeURIComponent(apiUrl); }
-    },
-    linkLabels = {
-      histograph: 'API',
-      geothesaurus: 'GeoThesaurus',
-      jsonld: 'JSON-LD',
-      geojson: 'geojson.io'
-    };
+function getLinks(feature, apiUrl, id, linksWanted){
+  var links = [];
 
-function getLinks(feature, linksWanted){
-  var firstHgid = feature.properties.pits[0].hgid,
-      apiUrl = 'https://api.erfgeo.nl/search?hgid=' + firstHgid, // getApiURL();
-      links = [];
-
-  linksWanted.forEach(function(value){
+  linksWanted.forEach(function(value) {
     if(!linkFormatters[value]){
       throw(new Error('getLinks:linkFormatterNotFound:' + value));
     }
 
-    links.push({ label: linkLabels[value], href: linkFormatters[value](apiUrl, firstHgid) });
+    links.push({ label: linkLabels[value], href: linkFormatters[value](apiUrl, id) });
   });
 
   return links;
@@ -47,37 +36,35 @@ function transformToAnchor(a){
 module.exports = React.createClass({
 
   getInitialState: function() {
+    var firstPit = this.props.feature.properties.pits[0];
+    var firstId = firstPit.id || firstPit.uri;
     var sortFields = [
-      "# relations",
-      "name",
-      "period",
-      "source"
+      '# relations',
+      'name',
+      'period',
+      'dataset'
     ];
 
-    var sources = this.props.sources
-        .reduce(function(o, v) {
-          o[v] = true;
-          return o;
-        }, {});
+    var datasets = this.props.datasets
+      .reduce(function(o, v) {
+        o[v] = true;
+        return o;
+      }, {});
 
-    var firstHgid = this.props.feature.properties.pits[0].hgid;
-    // TODO: use getApiURL function
-    var apiUrl = 'https://api.erfgeo.nl/search?hgid=' + firstHgid;
-
-
+    var apiUrl = this.props.config.api.baseUrl + 'search?q=' + firstId;
 
     return {
-      links: getLinks(this.props.feature, ['histograph', 'geothesaurus', 'jsonld', 'geojson']).map(transformToAnchor),
+      links: getLinks(this.props.feature, apiUrl, firstId, ['histograph', 'geothesaurus', 'jsonld', 'geojson']).map(transformToAnchor),
       loop: {
         index: 0,
         timer: null,
         delay: 800
       },
-      hgids: {
+      ids: {
 
       },
       filters: {
-        sources: sources,
+        datasets: datasets,
         name: /.*/,
         geometryTypes: {
           none: true,
@@ -96,13 +83,18 @@ module.exports = React.createClass({
   },
 
   render: function() {
+    var language = this.props.language;
     var pitCount = this.props.feature.properties.pits.length;
-    var message = language.Concept_contains + " " + pitCount + " " + language.place + " "
+    var message = " " + pitCount + " " + language.place + " "
         + ((pitCount == 1) ? language.name : language.names);
+
+    // pits
+    // relations
+    // geometries
 
     var filteredPits = this.props.feature.properties.pits
         .filter(function(pit) {
-          var filterGeometryType = "none";
+          var filterGeometryType = 'none';
           if (pit.geometryIndex > -1) {
             var geometryType = this.props.feature.geometry.geometries[pit.geometryIndex].type;
             if (geometryType === "Point" || geometryType === "MultiPoint") {
@@ -115,15 +107,15 @@ module.exports = React.createClass({
           }
 
           return this.state.filters.geometryTypes[filterGeometryType]
-              && this.state.filters.name.test(pit.name.toLowerCase())
-              && this.state.filters.sources[pit.source];
+              && this.state.filters.name.test(pit.name ? pit.name.toLowerCase() : '')
+              && this.state.filters.datasets[pit.dataset];
         }.bind(this));
 
     if (this.state.sortField != this.state.sortFields[0]) {
       filteredPits.sort(function(a, b) {
-        if (this.state.sortField == "name") {
+        if (this.state.sortField == 'name') {
           return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-        } else if (this.state.sortField == "period") {
+        } else if (this.state.sortField == 'period') {
           var dateA = a.hasBeginning || a.hasEnd,
               dateB = b.hasBeginning || b.hasEnd;
 
@@ -132,14 +124,14 @@ module.exports = React.createClass({
           if (!dateB) dateB = 8640000000000000;
 
           return (new Date(dateA)) - (new Date(dateB));
-        } else if (this.state.sortField == "source") {
-          return a.source.localeCompare(b.source);
+        } else if (this.state.sortField == 'dataset') {
+          return a.source.localeCompare(b.dataset);
         }
       }.bind(this));
     }
 
     var pits = filteredPits.map(function(pit, index) {
-      return <Pit key={pit.hgid} pit={pit} feature={this.props.feature} index={index}
+      return <Pit key={pit.uri || pit.id} pit={pit} feature={this.props.feature} index={index}
           ref={'item' + index} />;
     }.bind(this));
 
@@ -176,57 +168,57 @@ module.exports = React.createClass({
           <table>
             <tbody>
               <tr>
-                <td className="label">{ language.Data }</td>
-                <td className="links">
+                <td className='label'>{language.data}</td>
+                <td className='links'>
                   {this.state.links}
                 </td>
               </tr>
 
               <tr>
-                <td className="label">{ language.Concept }</td>
+                <td className='label'>{language.concept}</td>
                 <td>
-                  { pitsCount } { language.place } {language.names}, { relationsCount } {language.relations} (<a href='javascript:void(0)' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)
+                  {pitsCount} {language.placeNames}, {relationsCount} {language.relations} (<a href='javascript:void(0)' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)
                 </td>
               </tr>
 
               <tr style={{display: 'none'}}>
-                <td className="label">{ language.Filters }</td>
+                <td className='label'>{ language.filters }</td>
                 <td>
-                  <a href='javascript:void(0)'>{ language.filter_place_names }</a>
+                  <a href='javascript:void(0)'>{ language.filterPlaceNames }</a>
                 </td>
               </tr>
 
             </tbody>
-            <tbody className="hidden indent">
+            <tbody className='indent hidden'>
               <tr>
-                <td className="label">{ language.Names }</td>
+                <td className='label'>{ language.names }</td>
                 <td>
-                  <input type="search" placeholder={ language.filter_names } id="pit-name-filter" onChange={this.filterName}/>
+                  <input type='search' placeholder={ language.filterNames } id="pit-name-filter" onChange={this.filterName}/>
                 </td>
               </tr>
               <tr>
-                <td className="label">{ language.Sources }</td>
+                <td className='label'>{ language.datasets }</td>
                 <td>
-                  <span className="source-list">
-                    {this.props.sources.map(function(source, index) {
-                      var boundFilterSource = this.filterSource.bind(this, source),
-                          className = this.state.filters.sources[source] ? "" : "filtered";
-                      return <span key={source}><a className={className} href="#"
-                                onClick={boundFilterSource}><code>{source}</code></a> </span>;
+                  <span className='dataset-list'>
+                    {this.props.datasets.map(function(dataset, index) {
+                      var boundFilterDataset = this.filterDataset.bind(this, dataset),
+                          className = this.state.filters.datasets[dataset] ? '' : 'filtered';
+                      return <span key={dataset}><a className={className} href='#'
+                                onClick={boundFilterDataset}><code>{dataset}</code></a> </span>;
                     }.bind(this))}
                   </span>
                 </td>
               </tr>
 
               <tr>
-                <td className="label">{ language.Geom }</td>
+                <td className="label">{ language.geometry }</td>
                 <td>
                   <span className="geometry-type-list">
                     {Object.keys(this.state.filters.geometryTypes).map(function(geometryType, index) {
                       var boundFilterGeometryType = this.filterGeometryType.bind(this, geometryType),
                           //geometry-type
-                          className = this.state.filters.geometryTypes[geometryType] ? "" : "filtered";
-                      return <span key={geometryType}><a className={className} href="#"
+                          className = this.state.filters.geometryTypes[geometryType] ? '' : 'filtered';
+                      return <span key={geometryType}><a className={className} href='#'
                                 onClick={boundFilterGeometryType}>{geometryType}</a></span>;
                     }.bind(this))}
                   </span>
@@ -234,7 +226,7 @@ module.exports = React.createClass({
               </tr>
 
               <tr>
-                <td className="label">{ language.Sort }</td>
+                <td className="label">{ language.sort }</td>
                 <td className="sort-fields">
                   {this.state.sortFields.map(function(field, index) {
                     var boundSort = this.sort.bind(this, field),
@@ -316,26 +308,26 @@ module.exports = React.createClass({
     this.forceUpdate();
   },
 
-  filterSource: function(source, event) {
+  filterDataset: function(dataset, event) {
     if (event.shiftKey) {
-      var current = this.state.filters.sources[source];
+      var current = this.state.filters.datasets[dataset];
 
       var count = 0;
-      for (s in this.state.filters.sources) {
-        count += this.state.filters.sources[s] ? 1 : 0;
+      for (s in this.state.filters.datasets) {
+        count += this.state.filters.datasets[s] ? 1 : 0;
       }
 
-      var length = Object.keys(this.state.filters.sources).length;
+      var length = Object.keys(this.state.filters.datasets).length;
       if (length == count) {
         current = !current;
       }
 
-      for (s in this.state.filters.sources) {
-        this.state.filters.sources[s] = current;
+      for (s in this.state.filters.datasets) {
+        this.state.filters.datasets[s] = current;
       }
-      this.state.filters.sources[source] = !current;
+      this.state.filters.datasets[dataset] = !current;
     } else {
-      this.state.filters.sources[source] = !this.state.filters.sources[source];
+      this.state.filters.datasets[dataset] = !this.state.filters.datasets[dataset];
     }
 
     event.preventDefault();

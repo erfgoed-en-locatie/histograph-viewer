@@ -1,5 +1,3 @@
-'use strict';
-
 var React = require('react');
 var Results = require('./components/results');
 var SearchOptions = require('./components/search-options');
@@ -7,14 +5,6 @@ var Map = require('./components/map');
 var Graph = require('./components/graph');
 var d3 = require('d3');
 var Cortex = require('cortexjs');
-
-var languages = {
-  english: require('./language/english.json'),
-  dutch: require('./language/dutch.json')
-};
-
-var language = languages.english;
-//language = languages.dutch;
 
 var disableHashChange = false;
 
@@ -41,10 +31,10 @@ module.exports = React.createClass({
           <div className='box-container-padding'>
             <div id='search-box' className='box padding'>
               <a href='http://histograph.io/'><img src='images/histograph.svg' /></a>
-              <input type='search' placeholder={language.search_placeholder}
+              <input type='search' placeholder={this.props.language.searchPlaceholder}
                   onKeyDown={this.search} ref='searchInput' />
             </div>
-            <Results geojson={this.state.geojson} route={this.state.route} ref='results' map={this.refs.map} />
+            <Results config={this.props.config} language={this.props.language} geojson={this.state.geojson} route={this.state.route} ref='results' map={this.refs.map} />
           </div>
         </div>
         <SearchOptions />
@@ -89,12 +79,12 @@ module.exports = React.createClass({
 
   callApi: function(query) {
     d3.json(this.getApiUrl(query), function(error, geojson) {
-      var errorMessage = null;
+      var errorMessage;
       if (error) {
         try {
           errorMessage = JSON.parse(error.response).error;
         } catch (e) {
-          errorMessage = language.invalid_response;
+          errorMessage = this.props.language.invalidResponse;
         }
       }
       // TODO: use errorMessage
@@ -128,15 +118,15 @@ module.exports = React.createClass({
   },
 
   getApiUrl: function(queryString) {
-    return this.props.apiUrl + 'search?q=' + queryString.replace(' ', '');
+    return this.props.config.api.baseUrl + 'search?q=' + queryString;
   },
 
   parseHash: function (hash) {
     var params = {};
-    decodeURIComponent(hash).split("&").forEach(function(param) {
+    decodeURIComponent(hash).split('&').forEach(function(param) {
       if (param.indexOf("=") > -1) {
-        var kv = param.split("=");
-        params[kv[0]] = kv.slice(1).join("=");
+        var kv = param.split('=');
+        params[kv[0]] = kv.slice(1).join('=');
       }
     });
 
@@ -145,7 +135,7 @@ module.exports = React.createClass({
 
   handleHash: function (params){
     if (params.search) {
-      d3.select("input[type=search]").property('value', params.search);
+      d3.select('input[type=search]').property('value', params.search);
       this.search({keyCode: 13});
     }
   },

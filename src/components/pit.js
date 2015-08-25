@@ -1,29 +1,29 @@
-'use strict';
-
 var React = require('react');
 
 module.exports = React.createClass({
 
   render: function() {
-    var pit = this.props.pit,
-        uriRow,
-        geometryRow,
-        periodRow,
-        geometrySpan,
-        buttons;
+    var pit = this.props.pit;
+    var uriIdRow;
+    var geometryRow;
+    var periodRow;
+    var geometrySpan;
+    var buttons;
 
     if (pit.uri) {
-      uriRow = (<tr><td className='label'>URI</td><td><a href={pit.uri}>{pit.uri}</a></td></tr>);
+      uriIdRow = (<tr><td className='label'>URI</td><td><a className='id' href={pit.uri}>{pit.uri}</a></td></tr>);
+    } else {
+      uriIdRow = (<tr><td className='label'>ID</td><td className='id'>{pit.id}</td></tr>);
     }
 
-    if (pit.hasBeginning || pit.hasEnd) {
+    if (pit.validSince || pit.validUntil) {
       var period;
-      if (pit.hasBeginning && pit.hasEnd) {
-        period = pit.hasBeginning + ' - ' + pit.hasEnd;
-      } else if (pit.hasBeginning) {
-        period = 'from ' + pit.hasBeginning;
-      } else if (pit.hasEnd) {
-        period = 'until ' + pit.hasEnd;
+      if (pit.validSince && pit.validUntil) {
+        period = pit.validSince[0] + ' - ' + pit.validUntil[1];
+      } else if (pit.validSince) {
+        period = 'from ' + pit.validSince[0];
+      } else if (pit.validUntil) {
+        period = 'until ' + pit.validUntil[1];
       }
       periodRow = (<tr><td className='label'>Period</td><td>{period}</td></tr>);
     }
@@ -50,11 +50,8 @@ module.exports = React.createClass({
         <div>
           <table>
             <tbody>
-              <tr>
-                <td className='label'>ID</td>
-                <td><code>{pit.hgid}</code></td>
-              </tr>
-              {uriRow}
+              <tr><td className='label'>Dataset</td><td className='id'>{pit.dataset}</td></tr>
+              {uriIdRow}
               {periodRow}
             </tbody>
           </table>

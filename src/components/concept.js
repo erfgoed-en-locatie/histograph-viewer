@@ -1,18 +1,8 @@
-'use strict';
-
 var React = require('react');
 var L = require('leaflet');
 var ConceptSimple = require('./concept-simple');
 var ConceptDetails = require('./concept-details');
 var Message = require('./message');
-
-var languages = {
-  english: require('../language/english.json'),
-  dutch: require('../language/dutch.json')
-};
-
-var language = languages.english;
-//language = languages.dutch;
 
 module.exports = React.createClass({
 
@@ -23,19 +13,53 @@ module.exports = React.createClass({
     var selectedNames = sortedNames.slice(0, 4).map(function(name) { return name.name; });
     var selectedNamesSuffix;
 
-    if (selectedNames.length > 1) {
-      var namesLengthDiff = sortedNames.length - selectedNames.length;
-      var namesPlurSing = namesLengthDiff == 1 ? language.name : language.names;
-      selectedNamesSuffix = sortedNames.length > selectedNames.length ? " " + language.and + " " + namesLengthDiff + " " + language.other + " " +  namesPlurSing : "";
+    var title = selectedName;
+    var liesInPits = [];
+    feature.properties.pits.forEach(function(pit) {
+      var liesInIds = [];
+      if (pit.relations && pit.relations['hg:liesIn']) {
+        liesInIds.push(pit.relations['hg:liesIn'].map(function(relation) {
+          return relation['@id'];
+        })[0]);
+      }
+
+      if (pit.hairs) {
+        pit.hairs.forEach(function(hair) {
+          if (liesInIds.indexOf(hair['@id']) > -1 && hair.name) {
+            liesInPits.push(hair);
+          }
+        }.bind(this));
+      }
+    }.bind(this));
+
+    if (liesInPits.length > 0) {
+      var liesInTitle = liesInPits[0].name
+      this.props.config.viewer.suffixFilters.forEach(function(filter) {
+        liesInTitle = liesInTitle.replace(filter, '').trim();
+      });
+
+      title += ', ' + liesInTitle;
     }
 
-    var sources = feature.properties.pits
-      .map(function(pit) { return pit.source; })
+    if (selectedNames.length > 1) {
+      var namesLengthDiff = sortedNames.length - selectedNames.length;
+      var namesPlurSing = namesLengthDiff == 1 ? this.props.language.name : this.props.language.names;
+      selectedNamesSuffix = sortedNames.length > selectedNames.length ? ' ' + this.props.language.and + ' ' + namesLengthDiff + ' ' + this.props.language.other + " " +  namesPlurSing : '';
+    }
+
+    var datasets = feature.properties.pits
+      .filter(function(pit) {
+        return pit.dataset;
+      })
+      .map(function(pit) {
+        return pit.dataset;
+      })
       .unique();
 
     return {
-      sources: sources,
+      datasets: datasets,
       names: {
+        title: title,
         name: selectedName,
         names: sortedNames,
         selected: selectedNames,
@@ -45,8 +69,12 @@ module.exports = React.createClass({
   },
 
   sortNames: function(pits) {
-    var names = pits.map(function(pit) { return pit.name; }),
-        counts = {};
+    var names = pits.filter(function(pit) {
+      return pit.name;
+    }).map(function(pit) {
+      return pit.name;
+    });
+    var counts = {};
 
     for (var k = 0, j = names.length; k < j; k++) {
       counts[names[k]] = (counts[names[k]] || 0) + 1;
@@ -72,10 +100,10 @@ module.exports = React.createClass({
 
     var conceptContent;
     if (selected == -1) {
-      conceptContent = <ConceptSimple sources={this.state.sources} names={this.state.names}
+      conceptContent = <ConceptSimple config={this.props.config} language={this.props.language} datasets={this.state.datasets} names={this.state.names}
           type={this.props.feature.properties.type} showDetails={this.details} />;
     } else {
-      conceptContent = <ConceptDetails sources={this.state.sources} names={this.state.names}
+      conceptContent = <ConceptDetails config={this.props.config} language={this.props.language} datasets={this.state.datasets} names={this.state.names}
           feature={this.props.feature} route={this.props.route} />;
     }
 
@@ -83,8 +111,8 @@ module.exports = React.createClass({
       <li className={className} onClick={this.zoom} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave}>
         <div className='side-padding'>
           <h5>
-            <span>{this.state.names.name}</span>
-            <span className='type-header'>{this.props.feature.properties.type.replace("hg:", "")}</span>
+            <span>{this.state.names.title}</span>
+            <span className='type-header'>{this.props.feature.properties.type.replace('hg:', '')}</span>
           </h5>
         </div>
         {conceptContent}
@@ -119,11 +147,14 @@ module.exports = React.createClass({
     this.featureGroup = L.featureGroup();
 
     feature.geometry.geometries.map(function(geometry, geometryIndex) {
-      var hgid,
-          pitIndex;
+      var id;
+      var uri;
+      var pitIndex;
+
       for (pitIndex = 0; pitIndex < feature.properties.pits.length; pitIndex++) {
         if (feature.properties.pits[pitIndex].geometryIndex == geometryIndex) {
-          hgid = feature.properties.pits[pitIndex].hgid;
+          id = feature.properties.pits[pitIndex].id;
+          uri = feature.properties.pits[pitIndex].uri;
           break;
         }
       }
@@ -134,7 +165,8 @@ module.exports = React.createClass({
           conceptIndex: this.props.index,
           geometryIndex: geometryIndex,
           pitIndex: pitIndex,
-          hgid: hgid
+          id: id,
+          uri: uri
         },
         geometry: geometry
       };

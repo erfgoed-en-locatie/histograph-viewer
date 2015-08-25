@@ -1,14 +1,4 @@
-'use strict';
-
 var React = require('react');
-
-var languages = {
-  english: require('../language/english.json'),
-  dutch: require('../language/dutch.json')
-};
-
-var language = languages.english;
-//language = languages.dutch;
 
 module.exports = React.createClass({
   render: function() {
@@ -28,18 +18,18 @@ module.exports = React.createClass({
               </td>
             </tr>
             <tr>
-              <td className='label'>Sources</td>
+              <td className='label'>{this.props.language.datasets}</td>
               <td>
-                <span className='source-list'>
-                  {this.props.sources.map(function(source, index) {
-                    return <span key={index}>{source}</span>;
+                <span className='dataset-list'>
+                  {this.props.datasets.map(function(dataset, index) {
+                    return <span key={index}>{dataset}</span>;
                   })}
                 </span>
               </td>
             </tr>
             <tr>
               <td colSpan='2'>
-                <a className='show-details' onClick={this.props.showDetails} title={language.show_concept_details} href='javascript:void(0)'>{ language.show_details }</a>
+                <a className='show-details' onClick={this.props.showDetails} title={this.props.language.showConceptDetails} href='javascript:void(0)'>{ this.props.language.showDetails}</a>
               </td>
             </tr>
           </tbody>
