@@ -53,6 +53,7 @@ module.exports = React.createClass({
     var message = " " + pitCount + " " + language.place + " "
         + ((pitCount == 1) ? language.name : language.names);
 
+    // NU HET
     // pits
     // relations
     // geometries
@@ -100,11 +101,9 @@ module.exports = React.createClass({
           ref={'item' + index} />;
     }.bind(this));
 
-
     var geometryCount = filteredPits.filter(function(pit) {
       return pit.geometryIndex > -1;
     }).length;
-
 
     var filterMessage;
 
@@ -169,7 +168,7 @@ module.exports = React.createClass({
   },
 
   getLinks: function(apiUrl, id) {
-    return this.props.linkFormatters.map(function(linkFormatter) {
+    return this.props.linkFormatters.map(function(linkFormatter, index) {
       return {
         title: linkFormatter.title,
         href: linkFormatter.format(apiUrl, id)
@@ -177,8 +176,8 @@ module.exports = React.createClass({
     });
   },
 
-  transformToAnchor: function(a) {
-    return <span><a href={a.href}>{a.title}</a></span>;
+  transformToAnchor: function(a, i) {
+    return <span key={i}><a href={a.href}>{a.title}</a></span>;
   },
 
   sort: function(field, event) {
