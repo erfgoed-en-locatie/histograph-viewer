@@ -14,7 +14,10 @@ module.exports = React.createClass({
     return {
       sidebarWidth: 450,
       route: new Cortex({
-        geojson: null,
+        geojson: {
+          type: 'FeatureCollection',
+          features: []
+        },
         hidden: false
       }, function(updatedRoute) {
         this.setState({
@@ -119,8 +122,9 @@ module.exports = React.createClass({
   },
 
   componentDidUpdate: function() {
-    if (this.state.route.fitBounds && this.state.route.fitBounds.getValue() &&
-        this.state.geojson && this.state.geojson.features.length > 0) {
+    var fitBounds = this.state.route.fitBounds && this.state.route.fitBounds.getValue();
+    var features = this.state.route.geojson && this.state.route.geojson.getValue().features;
+    if (fitBounds && features.length) {
       this.refs.map.fitBounds(this.refs.map.getConceptLayer());
       this.state.route.fitBounds.set(false);
     }
