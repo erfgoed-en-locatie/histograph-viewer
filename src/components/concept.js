@@ -106,7 +106,7 @@ module.exports = React.createClass({
           title: 'GeoThesaurus',
           default: true,
           format: function(apiUrl, id) {
-            return 'http://geothesaurus.nl/hgconcept/frompit/' + id;
+            return 'http://thesaurus.erfgeo.nl/hgconcept/?id=' + encodeURIComponent(id);
           }
         },
         {
