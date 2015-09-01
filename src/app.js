@@ -1,20 +1,10 @@
-'use strict';
-
 var React = require('react');
 var Results = require('./components/results');
-var SearchOptions = require('./components/search-options');
+// var SearchOptions = require('./components/search-options');
 var Map = require('./components/map');
 var Graph = require('./components/graph');
 var d3 = require('d3');
 var Cortex = require('cortexjs');
-
-var languages = {
-  english: require('./language/english.json'),
-  dutch: require('./language/dutch.json')
-};
-
-var language = languages.english;
-//language = languages.dutch;
 
 var disableHashChange = false;
 
@@ -23,8 +13,11 @@ module.exports = React.createClass({
   getInitialState: function() {
     return {
       sidebarWidth: 450,
-      geojson: null,
       route: new Cortex({
+        geojson: {
+          type: 'FeatureCollection',
+          features: []
+        },
         hidden: false
       }, function(updatedRoute) {
         this.setState({
@@ -35,21 +28,32 @@ module.exports = React.createClass({
   },
 
   render: function() {
+    var logo;
+    var inputStyle = {
+       width: '100%'
+    };
+
+    if (this.props.config.viewer.logo) {
+      logo = (<a href='http://histograph.io/'><img width='44px' src={this.props.config.viewer.logo} /></a>);
+      inputStyle = {
+        width: 'calc(100% - 52px)'
+      }
+    }
+
     return (
       <div>
         <div id='sidebar-container' className='box-container' ref='container'>
           <div className='box-container-padding'>
             <div id='search-box' className='box padding'>
-              <a href='http://histograph.io/'><img src='images/histograph.svg' /></a>
-              <input type='search' placeholder={language.search_placeholder}
+              {logo}
+              <input style={inputStyle} type='search' placeholder={this.props.language.searchPlaceholder}
                   onKeyDown={this.search} ref='searchInput' />
             </div>
-            <Results geojson={this.state.geojson} route={this.state.route} ref='results' map={this.refs.map} />
+            <Results config={this.props.config} language={this.props.language} route={this.state.route} ref='results' map={this.refs.map} />
           </div>
         </div>
-        <SearchOptions />
         <Map route={this.state.route} sidebarWidth={this.state.sidebarWidth} ref='map' />
-        <Graph toggleLeafs={this.toggleLeafs} showLeafs={this.state.showLeafs} geojson={this.state.geojson} route={this.state.route} ref='graph' />
+        <Graph toggleLeafs={this.toggleLeafs} showLeafs={this.state.showLeafs} route={this.state.route} ref='graph' />
       </div>
     );
   },
@@ -80,26 +84,25 @@ module.exports = React.createClass({
     if (event.keyCode == 13) {
       var value = React.findDOMNode(this.refs.searchInput).value;
       // TODO: hash! react router?
-      //setHash('search=' + value);
       this.callApi(value);
-
       this.setHash('search=' + value);
     }
   },
 
   callApi: function(query) {
     d3.json(this.getApiUrl(query), function(error, geojson) {
-      var errorMessage = null;
+      var errorMessage;
       if (error) {
         try {
           errorMessage = JSON.parse(error.response).error;
         } catch (e) {
-          errorMessage = language.invalid_response;
+          errorMessage = this.props.language.invalidResponse;
         }
       }
       // TODO: use errorMessage
 
       var route = {
+        geojson: geojson,
         error: errorMessage,
         fitBounds: true,
         search: query,
@@ -113,30 +116,29 @@ module.exports = React.createClass({
           highlighted: -1
         }
       };
-
-      this.state.geojson = geojson;
       this.state.route.set(route);
     }.bind(this));
   },
 
   componentDidUpdate: function() {
-    if (this.state.route.fitBounds && this.state.route.fitBounds.getValue() &&
-        this.state.geojson && this.state.geojson.features.length > 0) {
+    var fitBounds = this.state.route.fitBounds && this.state.route.fitBounds.getValue();
+    var features = this.state.route.geojson && this.state.route.geojson.getValue().features;
+    if (fitBounds && features.length) {
       this.refs.map.fitBounds(this.refs.map.getConceptLayer());
       this.state.route.fitBounds.set(false);
     }
   },
 
   getApiUrl: function(queryString) {
-    return this.props.apiUrl + 'search?q=' + queryString;
+    return this.props.config.api.baseUrl + 'search?q=' + queryString;
   },
 
   parseHash: function (hash) {
     var params = {};
-    decodeURIComponent(hash).split("&").forEach(function(param) {
-      if (param.indexOf("=") > -1) {
-        var kv = param.split("=");
-        params[kv[0]] = kv.slice(1).join("=");
+    decodeURIComponent(hash).split('&').forEach(function(param) {
+      if (param.indexOf('=') > -1) {
+        var kv = param.split('=');
+        params[kv[0]] = kv.slice(1).join('=');
       }
     });
 
@@ -145,7 +147,7 @@ module.exports = React.createClass({
 
   handleHash: function (params){
     if (params.search) {
-      d3.select("input[type=search]").property('value', params.search);
+      d3.select('input[type=search]').property('value', params.search);
       this.search({keyCode: 13});
     }
   },
@@ -153,7 +155,7 @@ module.exports = React.createClass({
   setHash: function(hash){
     disableHashChange = true;
     location.hash = hash;
-    setTimeout(function(){
+    setTimeout(function() {
       disableHashChange = false;
     }, 1000);
   }

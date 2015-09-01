@@ -7,20 +7,19 @@
     "cortexjs": "^0.8.4",
     "d3": "^3.5.5",
     "leaflet": "^0.7.3",
-    "react": "^0.13.1",
-    "underscore": "^1.8.3",
-    "webcola": "^0.1.1"
+    "react": "^0.13.3"
   },
   "devDependencies": {
     "eslint": "^0.16.2",
     "hintify": "^0.1.0",
     "reactify": "^1.1.0",
     "serve": "^1.4.0",
-    "watchify": "^2.4.0"
+    "watchify": "^2.4.0",
+    "histograph-config": "histograph/config"
   },
   "scripts": {
-    "start": "watchify -d -t reactify src/index.js -o dist/bundle.js & serve",
-    "develop": "watchify -d -t reactify src/index.js & serve",
+    "start": "node viewer-config.js > config.json && watchify -d -t reactify src/index.js -o dist/bundle.js & serve",
+    "develop": "node viewer-config.js > config.json && watchify -d -t reactify src/index.js & serve",
     "test": "eslint src/*.js src/components/*.js"
   },
   "repository": {
@@ -28,7 +27,7 @@
     "url": "https://github.com/histograph/viewer.git"
   },
   "author": "Bert Spaan",
-  "license": "GPLv3",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/histograph/viewer/issues"
   },
