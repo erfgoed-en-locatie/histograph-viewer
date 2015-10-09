@@ -8,18 +8,20 @@ var Cortex = require('cortexjs');
 
 var disableHashChange = false;
 
+var defaultRoute = {
+  geojson: {
+    type: 'FeatureCollection',
+    features: null
+  },
+  hidden: false
+};
+
 module.exports = React.createClass({
 
   getInitialState: function() {
     return {
       sidebarWidth: 450,
-      route: new Cortex({
-        geojson: {
-          type: 'FeatureCollection',
-          features: []
-        },
-        hidden: false
-      }, function(updatedRoute) {
+      route: new Cortex(defaultRoute, function(updatedRoute) {
         this.setState({
           route: updatedRoute
         });
@@ -90,6 +92,11 @@ module.exports = React.createClass({
   },
 
   callApi: function(query) {
+    if (!query) {
+      this.state.route.set(defaultRoute);
+      return;
+    }
+
     d3.json(this.getApiUrl(query), function(error, geojson) {
       var errorMessage;
       if (error) {

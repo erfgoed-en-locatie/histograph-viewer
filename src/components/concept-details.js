@@ -123,6 +123,9 @@ module.exports = React.createClass({
       }
     });
 
+    // Graph button:
+    /*(<a href='javascript:void(0)' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)*/
+
     return (
       <div>
         <div className='side-padding'>
