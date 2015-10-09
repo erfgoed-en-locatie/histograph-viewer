@@ -5,7 +5,8 @@
 	"queryExamples": [
 		{ "href": "#search=noviomagus", "label": "Noviomagus" },
 		{ "href": "#search=sutphen", "label": "Sutphen" },
-		{ "href": "#search=\"aan zee\"", "label": "coastal towns" }
+		{ "href": "#search=\"aan zee\"", "label": "coastal towns" },
+		{ "href": "#search=amsteldijk", "label": "Amsteldijk" }
 	],
 	"placeConcept": "place concept",
 	"placeConcepts": "place concepts",

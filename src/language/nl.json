@@ -5,7 +5,8 @@
 	"queryExamples": [
 		{ "href": "#search=noviomagus", "label": "Noviomagus" },
 		{ "href": "#search=sutphen", "label": "Sutphen" },
-		{ "href": "#search=\"aan zee\"", "label": "coastal towns" }
+		{ "href": "#search=\"aan zee\"", "label": "coastal towns" },
+		{ "href": "#search=amsteldijk", "label": "Amsteldijk" }
 	],
 	"placeConcept": "plaatsconcept",
 	"placeConcepts": "plaatsconcepten",
@@ -39,6 +40,6 @@
 	"sort": "Sorteer",
 	"close": "Sluit",
 	"noConceptsFound": "Geen concepten gevonden",
-	"invalidResponse": "Ongeldige respons van Histograph API",
+	"invalidResponse": "Ongeldige antwoord van Histograph API",
   "withoutGeometry": "zonder geometrie"
 }
