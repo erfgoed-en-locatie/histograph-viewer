@@ -8,6 +8,7 @@ module.exports = React.createClass({
     var geometryRow;
     var periodRow;
     var geometrySpan;
+    var nameSpan;
     var buttons;
 
     if (pit.uri) {
@@ -42,11 +43,15 @@ module.exports = React.createClass({
       geometrySpan = (<span title={geometryType} className={geometryClassName}/>);
     }
 
-    var className = 'padding pit';// + (!this.state.selected &! this.state.unfade ? ' faded' : '');
+    if (pit.name && pit.name !== '') {
+      nameSpan = (<span className='place-name'>{pit.name}</span>);
+    }
+
+    var className = 'padding pit';
 
     return (
       <li className={className}>
-        <h6><span className='place-name'>{pit.name}</span>{geometrySpan}</h6>
+        <h6>{nameSpan}{geometrySpan}</h6>
         <div>
           <table>
             <tbody>

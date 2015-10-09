@@ -63,12 +63,12 @@ module.exports = React.createClass({
           var filterGeometryType = 'none';
           if (pit.geometryIndex > -1) {
             var geometryType = this.props.feature.geometry.geometries[pit.geometryIndex].type;
-            if (geometryType === "Point" || geometryType === "MultiPoint") {
-              filterGeometryType = "points";
-            } else if (geometryType === "LineString" || geometryType === "MultiLineString") {
-              filterGeometryType = "lines";
-            } else if (geometryType === "Polygon" || geometryType === "MultiPolygon") {
-              filterGeometryType = "polygons";
+            if (geometryType === 'Point' || geometryType === 'MultiPoint') {
+              filterGeometryType = 'points';
+            } else if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
+              filterGeometryType = 'lines';
+            } else if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
+              filterGeometryType = 'polygons';
             }
           }
 
@@ -123,9 +123,6 @@ module.exports = React.createClass({
       }
     });
 
-    // {message}  <a id="show-graph" className="float-right" href="#" onClick={this.showGraph}>Show graph</a>
-
-
     return (
       <div>
         <div className='side-padding'>
@@ -141,7 +138,7 @@ module.exports = React.createClass({
               <tr>
                 <td className='label'>{language.concept}</td>
                 <td>
-                  {pitsCount} {language.placeNames}, {relationsCount} {language.relations} (<a href='javascript:void(0)' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)
+                  {pitsCount} {language.placeNames}, {relationsCount} {language.relations}
                 </td>
               </tr>
 
@@ -159,7 +156,7 @@ module.exports = React.createClass({
           </p>
         </div>
 
-        <ol id="pits" className="list">
+        <ol id='pits' className='list'>
           {pits}
         </ol>
 
@@ -223,8 +220,8 @@ module.exports = React.createClass({
   },
 
   filterName: function(event) {
-    var value = document.getElementById("pit-name-filter").value.toLowerCase();
-    this.state.filters.name = new RegExp(".*" + value + ".*");
+    var value = document.getElementById('pit-name-filter').value.toLowerCase();
+    this.state.filters.name = new RegExp('.*' + value + '.*');
     this.forceUpdate();
   },
 
