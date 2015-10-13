@@ -42,5 +42,6 @@
 	"noConceptsFound": "No concepts found",
 	"invalidResponse": "Invalid reponse from Histograph API",
   "withoutGeometry": "without geometry",
-  "outgoingRelations": "Outgoing relations"
+  "outgoingRelations": "Outgoing relations",
+  "noName": "No name"
 }

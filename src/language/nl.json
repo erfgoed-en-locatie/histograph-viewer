@@ -42,5 +42,6 @@
 	"noConceptsFound": "Geen concepten gevonden",
 	"invalidResponse": "Ongeldige antwoord van Histograph API",
   "withoutGeometry": "zonder geometrie",
-  "outgoingRelations": "Uitgaande relaties"
+  "outgoingRelations": "Uitgaande relaties",
+  "noName": "Zonder naam"
 }

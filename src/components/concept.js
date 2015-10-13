@@ -9,7 +9,7 @@ module.exports = React.createClass({
   getInitialState: function() {
     var feature = this.props.feature;
     var sortedNames = this.sortNames(feature.properties.pits);
-    var selectedName = sortedNames[0].name;
+    var selectedName = sortedNames.length ? sortedNames[0].name : null;
     var selectedNames = sortedNames.slice(0, 4).map(function(name) { return name.name; });
     var selectedNamesSuffix;
 
@@ -164,11 +164,17 @@ module.exports = React.createClass({
           feature={this.props.feature} route={this.props.route} />;
     }
 
+    if (this.state.names.title) {
+      var title = <span>{this.state.names.title}</span>;
+    } else {
+      var title = <span><i>{this.props.language.noName}</i></span>;
+    }
+
     return (
       <li className={className} onClick={this.zoom} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave}>
         <div className='side-padding'>
           <h5>
-            <span>{this.state.names.title}</span>
+            {title}
             <span className='type-header'>{this.props.feature.properties.type.replace('hg:', '')}</span>
           </h5>
         </div>

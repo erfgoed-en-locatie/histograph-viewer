@@ -2,21 +2,27 @@ var React = require('react');
 
 module.exports = React.createClass({
   render: function() {
+    var namesRow;
+
+    if (this.props.names.selected.length) {
+      namesRow = (<tr>
+        <td className='label'>Names</td>
+        <td>
+          <span>
+            {this.props.names.selected.map(function(name, index) {
+              return <span key={index} className='concept-alt-name'>{name}</span>;
+            })}
+          </span>
+          <span>{this.props.names.suffix}</span>
+        </td>
+      </tr>);
+    }
+
     return (
       <div className='side-padding'>
         <table>
           <tbody>
-            <tr>
-              <td className='label'>Names</td>
-              <td>
-                <span>
-                  {this.props.names.selected.map(function(name, index) {
-                    return <span key={index} className='concept-alt-name'>{name}</span>;
-                  })}
-                </span>
-                <span>{this.props.names.suffix}</span>
-              </td>
-            </tr>
+            {namesRow}
             <tr>
               <td className='label'>{this.props.language.datasets}</td>
               <td>
