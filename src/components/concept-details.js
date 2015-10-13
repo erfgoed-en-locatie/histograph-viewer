@@ -21,8 +21,38 @@ module.exports = React.createClass({
 
     var apiUrl = this.props.config.api.baseUrl + 'search?q=' + firstId;
 
+    var hairs = [];
+    var equivalence = 'hg:sameHgConcept';
+    this.props.feature.properties.pits.forEach(function(pit) {
+      var hairMap = {};
+      if (pit.hairs) {
+        pit.hairs.forEach(function(hair) {
+          hairMap[hair['@id']] = hair.name;
+        });
+      }
+
+      if (pit.relations) {
+        Object.keys(pit.relations)
+          .filter(function(relation) {
+            return relation !== '@id' && relation !== equivalence;
+          })
+          .forEach(function(relation) {
+            pit.relations[relation].forEach(function(ids) {
+              if (hairMap[ids['@id']]) {
+                hairs.push({
+                  '@id': ids['@id'],
+                  type: relation,
+                  name: hairMap[ids['@id']]
+                });
+              }
+            });
+          });
+      }
+    });
+
     return {
       links: this.getLinks(apiUrl, firstId).map(this.transformToAnchor),
+      hairs: hairs,
       loop: {
         index: 0,
         timer: null,
@@ -50,13 +80,8 @@ module.exports = React.createClass({
   render: function() {
     var language = this.props.language;
     var pitCount = this.props.feature.properties.pits.length;
-    var message = " " + pitCount + " " + language.place + " "
+    var message = ' ' + pitCount + ' ' + language.place + ' '
         + ((pitCount == 1) ? language.name : language.names);
-
-    // NU HET
-    // pits
-    // relations
-    // geometries
 
     var filteredPits = this.props.feature.properties.pits
         .filter(function(pit) {
@@ -123,6 +148,22 @@ module.exports = React.createClass({
       }
     });
 
+    var hairsRow;
+    if (this.state.hairs.length) {
+      hairsRow = (
+        <tr>
+          <td className='label'>{language.outgoingRelations}</td>
+          <td>
+            <ul className='hairs'>
+            {this.state.hairs.map(function(hair, index) {
+              return <li key={'hair' + index}><span className='id'>{hair.type}</span> <a href={'#search=' + hair['@id']}>{hair.name}</a></li>;
+            }.bind(this))}
+            </ul>
+          </td>
+        </tr>
+      );
+    }
+
     // Graph button:
     /*(<a href='javascript:void(0)' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)*/
 
@@ -144,6 +185,8 @@ module.exports = React.createClass({
                   {pitsCount} {language.placeNames}, {relationsCount} {language.relations}
                 </td>
               </tr>
+
+              {hairsRow}
 
               <tr style={{display: 'none'}}>
                 <td className='label'>{ language.filters }</td>

@@ -480,6 +480,15 @@ text {
   margin: 0;
 }
 
+.hairs {
+  margin: 0;
+  list-style-type: none;
+}
+
+.hairs li {
+  padding: 0;
+}
+
 .box ul:last-child,
 .box p:last-child {
   margin-bottom: 0;

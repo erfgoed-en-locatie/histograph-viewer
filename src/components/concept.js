@@ -302,7 +302,7 @@ module.exports = React.createClass({
   },
 
   removeLayer: function() {
-    // // Remove item's GeoJSON layer from Leaflet map
+    // Remove item's GeoJSON layer from Leaflet map
     this.props.map.getConceptLayer().removeLayer(this.featureGroup);
   },
 
