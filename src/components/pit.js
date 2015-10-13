@@ -7,6 +7,7 @@ module.exports = React.createClass({
     var uriIdRow;
     var geometryRow;
     var periodRow;
+    var dataRow;
     var geometrySpan;
     var nameSpan;
     var buttons;
@@ -18,13 +19,17 @@ module.exports = React.createClass({
     }
 
     if (pit.validSince || pit.validUntil) {
+      var formatDate = function(date) {
+        return date.replace('-01-01', '').replace('-12-31', '');
+      };
+
       var period;
       if (pit.validSince && pit.validUntil) {
-        period = pit.validSince[0] + ' - ' + pit.validUntil[1];
+        period = formatDate(pit.validSince[0]) + ' - ' + formatDate(pit.validUntil[1]);
       } else if (pit.validSince) {
-        period = 'from ' + pit.validSince[0];
+        period = 'from ' + formatDate(pit.validSince[0]);
       } else if (pit.validUntil) {
-        period = 'until ' + pit.validUntil[1];
+        period = 'until ' + formatDate(pit.validUntil[1]);
       }
       periodRow = (<tr><td className='label'>Period</td><td>{period}</td></tr>);
     }
@@ -47,6 +52,17 @@ module.exports = React.createClass({
       nameSpan = (<span className='place-name'>{pit.name}</span>);
     }
 
+    if (pit.data) {
+      dataRow = (
+        <tr>
+          <td className='label'>Data</td>
+          <td>
+            <pre><code ref='data' className='json'>{JSON.stringify(pit.data, null, 2)}</code></pre>
+          </td>
+        </tr>
+      );
+    }
+
     var className = 'padding pit';
 
     return (
@@ -58,12 +74,20 @@ module.exports = React.createClass({
               <tr><td className='label'>Dataset</td><td className='id'>{pit.dataset}</td></tr>
               {uriIdRow}
               {periodRow}
+              {dataRow}
             </tbody>
           </table>
           <div className='clear' />
         </div>
       </li>
     );
+  },
+
+  componentDidMount: function() {
+    if (this.refs.data) {
+      var node = React.findDOMNode(this.refs.data);
+      hljs.highlightBlock(node);
+    }
   }
 
 });
