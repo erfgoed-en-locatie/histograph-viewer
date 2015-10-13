@@ -117,7 +117,7 @@ module.exports = React.createClass({
         graph: false,
         concept: {
           highlighted: -1,
-          selected: -1
+          selected: geojson.features.length === 1 ? 0 : -1
         },
         pit: {
           highlighted: -1
