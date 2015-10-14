@@ -13,6 +13,7 @@ module.exports = React.createClass({
     var selectedNames = sortedNames.slice(0, 4).map(function(name) { return name.name; });
     var selectedNamesSuffix;
 
+    var type = this.props.feature.properties.type.replace('hg:', '');
     var title = selectedName;
     var liesInPits = [];
     feature.properties.pits.forEach(function(pit) {
@@ -41,6 +42,12 @@ module.exports = React.createClass({
       title += ', ' + liesInTitle;
     }
 
+    // Make sure concept title always fits
+    var maxTitleLength = 30 - type.length;
+    if (title.length > maxTitleLength) {
+      title = title.substr(0, maxTitleLength) + '…';
+    }
+
     if (selectedNames.length > 1) {
       var namesLengthDiff = sortedNames.length - selectedNames.length;
       var namesPlurSing = namesLengthDiff == 1 ? this.props.language.name : this.props.language.names;
@@ -60,6 +67,7 @@ module.exports = React.createClass({
 
     return {
       datasets: datasets,
+      type: type,
       names: {
         title: title,
         name: selectedName,
@@ -175,7 +183,7 @@ module.exports = React.createClass({
         <div className='side-padding'>
           <h5>
             {title}
-            <span className='type-header'>{this.props.feature.properties.type.replace('hg:', '')}</span>
+            <span className='type-header'>{this.state.type}</span>
           </h5>
         </div>
         {conceptContent}
