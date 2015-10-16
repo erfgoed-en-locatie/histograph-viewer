@@ -12,14 +12,15 @@
   "devDependencies": {
     "eslint": "^0.16.2",
     "hintify": "^0.1.0",
+    "histograph-config": "histograph/config",
     "reactify": "^1.1.0",
     "serve": "^1.4.0",
-    "watchify": "^2.4.0",
-    "histograph-config": "histograph/config"
+    "uglifyify": "^3.0.1",
+    "watchify": "^2.4.0"
   },
   "scripts": {
-    "start": "node viewer-config.js > config.json && watchify -d -t reactify src/index.js -o dist/bundle.js & serve",
-    "develop": "node viewer-config.js > config.json && watchify -d -t reactify src/index.js & serve",
+    "start": "NODE_ENV=development node viewer-config.js > config.json && watchify -d -t reactify src/index.js -o dist/bundle.js & serve",
+    "production": "NODE_ENV=production node viewer-config.js > config.json && browserify -t reactify -g uglifyify src/index.js -o dist/bundle.js",
     "test": "eslint src/*.js src/components/*.js"
   },
   "repository": {
