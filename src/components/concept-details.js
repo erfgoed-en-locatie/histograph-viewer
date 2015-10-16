@@ -164,8 +164,13 @@ module.exports = React.createClass({
       );
     }
 
-    // Graph button:
-    /*(<a href='javascript:void(0)' onClick={this.showGraph}>{ this.state.graphHidden ? language.hide : language.show } { language.graph }</a>)*/
+    if (this.state.graphHidden) {
+      var showGraphText = language.hide;
+      var showGraphEmoji = '😩';
+    } else {
+      var showGraphText = language.show;
+      var showGraphEmoji = '😅';
+    }
 
     return (
       <div>
@@ -182,7 +187,7 @@ module.exports = React.createClass({
               <tr>
                 <td className='label'>{language.concept}</td>
                 <td>
-                  {pitsCount} {language.placeNames}, {relationsCount} {language.relations}
+                  {pitsCount} {language.places}, {relationsCount} {language.relations} (<a href='#' onClick={this.showGraph}>{showGraphText} {language.graph}</a> {showGraphEmoji})
                 </td>
               </tr>
 
@@ -191,7 +196,7 @@ module.exports = React.createClass({
               <tr style={{display: 'none'}}>
                 <td className='label'>{ language.filters }</td>
                 <td>
-                  <a href='javascript:void(0)'>{ language.filterPlaceNames }</a>
+                  <a href='#'>{ language.filterPlaceNames }</a>
                 </td>
               </tr>
 
