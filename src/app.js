@@ -84,11 +84,68 @@ module.exports = React.createClass({
 
   search: function(event) {
     if (event.keyCode == 13) {
+      // TODO: Use something like React Router for hash routing?
+      // TODO: add route for selection of single concept (and even PIT?)
+
       var value = React.findDOMNode(this.refs.searchInput).value;
-      // TODO: hash! react router?
-      this.callApi(value);
+      var query = this.stringToQuery(value);
+      console.log(query)
+      this.callApi(this.queryToString(query));
       this.setHash('search=' + value);
     }
+  },
+
+  queryToString: function(query) {
+    var parts = [];
+    Object.keys(query).forEach(function(param) {
+      parts.push(param + '=' + query[param].join(','));
+    });
+    return parts.join('&');
+  },
+
+  stringToQuery: function(str) {
+    searchTypes = [
+      'q',
+      'id',
+      'uri',
+      'name'
+    ];
+
+    var search = [];
+    var params = {};
+    str.split(' ')
+      .map(function(part) {
+        return part.trim();
+      })
+      .filter(function(part) {
+        return part;
+      })
+      .forEach(function(part) {
+        if (part.indexOf('=') > -1) {
+          var paramValue = part.split('=');
+          var param = paramValue[0].trim();
+          var value = paramValue[1].trim();
+
+          if (searchTypes.indexOf(param) > -1) {
+            search.push(value);
+          } else if (param) {
+            if (!params[param]) {
+              params[param] = [];
+            }
+            params[param].push(value);
+          }
+        } else {
+          search.push(part);
+        }
+      });
+
+    if (!search.length) {
+      search = ['*'];
+    }
+
+    params.q = search;
+
+    return params;
   },
 
   callApi: function(query) {
@@ -137,10 +194,11 @@ module.exports = React.createClass({
   },
 
   getApiUrl: function(queryString) {
-    return this.props.config.api.baseUrl + 'search?q=' + queryString;
+    return this.props.config.api.baseUrl + 'search?' + queryString;
   },
 
   parseHash: function (hash) {
+    // TODO: move to/merge with queryToString function
     var params = {};
     decodeURIComponent(hash).split('&').forEach(function(param) {
       if (param.indexOf('=') > -1) {
@@ -154,7 +212,7 @@ module.exports = React.createClass({
 
   handleHash: function (params){
     if (params.search) {
-      d3.select('input[type=search]').property('value', params.search);
+      React.findDOMNode(this.refs.searchInput).value = params.search;
       this.search({keyCode: 13});
     }
   },
