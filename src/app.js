@@ -88,8 +88,13 @@ module.exports = React.createClass({
       // TODO: add route for selection of single concept (and even PIT?)
 
       var value = React.findDOMNode(this.refs.searchInput).value;
-      var query = this.stringToQuery(value);
-      console.log(query)
+
+      if (value) {
+        var query = this.stringToQuery(value);
+      } else {
+        query = {};
+      }
+
       this.callApi(this.queryToString(query));
       this.setHash('search=' + value);
     }
