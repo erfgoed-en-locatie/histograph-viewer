@@ -118,7 +118,7 @@ module.exports = React.createClass({
 
     var search = [];
     var params = {};
-    str.split(' ')
+    str.match(/(?:[^\s"]+|"[^"]*")+/g)
       .map(function(part) {
         return part.trim();
       })
