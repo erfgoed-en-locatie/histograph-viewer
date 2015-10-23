@@ -11,6 +11,5 @@ The viewer is now running on [http://localhost:3000](http://localhost:3000).
 
 [![](images/screenshot.jpg)](viewer#search=hoorn)
 
-## License
 
-The source for Histograph is released under the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+Copyright (C) 2015 [Waag Society](http://waag.org).
