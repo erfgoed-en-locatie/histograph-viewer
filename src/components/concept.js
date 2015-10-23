@@ -44,7 +44,7 @@ module.exports = React.createClass({
 
     // Make sure concept title always fits
     var maxTitleLength = 30 - type.length;
-    if (title.length > maxTitleLength) {
+    if (title && title.length > maxTitleLength) {
       title = title.substr(0, maxTitleLength) + '…';
     }
 
