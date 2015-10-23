@@ -96,7 +96,7 @@ module.exports = React.createClass({
       }
 
       this.callApi(this.queryToString(query));
-      this.setHash('search=' + value);
+      this.setHash('search=' + encodeURIComponent(value));
     }
   },
 
