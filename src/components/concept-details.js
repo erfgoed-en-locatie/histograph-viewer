@@ -27,7 +27,7 @@ module.exports = React.createClass({
       var hairMap = {};
       if (pit.hairs) {
         pit.hairs.forEach(function(hair) {
-          hairMap[hair['@id']] = hair.name;
+          hairMap[hair['@id']] = hair.name || hair['@id'];
         });
       }
 
@@ -156,7 +156,7 @@ module.exports = React.createClass({
           <td>
             <ul className='hairs'>
             {this.state.hairs.map(function(hair, index) {
-              return <li key={'hair' + index}><span className='id'>{hair.type}</span> <a href={'#search=' + hair['@id']}>{hair.name}</a></li>;
+              return <li key={'hair' + index}><span className='id'>{hair.type}</span> <a href={'#search=' + hair['@id']}>{hair.name || hair['@id']}</a></li>;
             }.bind(this))}
             </ul>
           </td>
