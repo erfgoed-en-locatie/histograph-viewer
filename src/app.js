@@ -100,21 +100,29 @@ module.exports = React.createClass({
     }
   },
 
+  searchTypes: [
+    'q',
+    'id',
+    'uri',
+    'name'
+  ],
+
   queryToString: function(query) {
     var parts = [];
     Object.keys(query).forEach(function(param) {
-      parts.push(param + '=' + query[param].join(','));
-    });
+      var sep;
+      if (this.searchTypes.indexOf(param) > -1) {
+        var sep = ' ';
+      } else {
+        var sep = ',';
+      }
+
+      parts.push(param + '=' + query[param].join(sep));
+    }.bind(this));
     return parts.join('&');
   },
 
   stringToQuery: function(str) {
-    searchTypes = [
-      'q',
-      'id',
-      'uri',
-      'name'
-    ];
 
     var search = [];
     var params = {};
@@ -131,7 +139,7 @@ module.exports = React.createClass({
           var param = paramValue[0].trim();
           var value = paramValue[1].trim();
 
-          if (searchTypes.indexOf(param) > -1) {
+          if (this.searchTypes.indexOf(param) > -1) {
             search.push(value);
           } else if (param) {
             if (!params[param]) {
@@ -142,7 +150,7 @@ module.exports = React.createClass({
         } else {
           search.push(part);
         }
-      });
+      }.bind(this));
 
     if (!search.length) {
       search = ['*'];
