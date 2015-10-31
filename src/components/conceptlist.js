@@ -1,5 +1,4 @@
 var React = require('react');
-var L = require('leaflet');
 var Concept = require('./concept');
 var Message = require('./message');
 
