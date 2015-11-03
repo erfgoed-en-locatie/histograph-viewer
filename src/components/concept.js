@@ -39,7 +39,9 @@ module.exports = React.createClass({
         liesInTitle = liesInTitle.replace(filter, '').trim();
       });
 
-      title += ', ' + liesInTitle;
+      if (title !== liesInTitle) {
+        title += ', ' + liesInTitle;
+      }
     }
 
     // Make sure concept title always fits
