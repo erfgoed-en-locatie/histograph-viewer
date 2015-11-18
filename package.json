@@ -5,7 +5,6 @@
   "main": "",
   "dependencies": {
     "cortexjs": "^0.8.4",
-    "d3": "^3.5.5",
     "leaflet": "^0.7.3",
     "react": "^0.13.3"
   },

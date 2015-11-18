@@ -3,7 +3,6 @@ var Results = require('./components/results');
 // var SearchOptions = require('./components/search-options');
 var Map = require('./components/map');
 var Graph = require('./components/graph');
-var d3 = require('d3');
 var Cortex = require('cortexjs');
 
 var disableHashChange = false;
