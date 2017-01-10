@@ -1,4 +1,5 @@
 var React = require('react');
+var ReactDOM = require('react-dom');
 var L = require('leaflet');
 var ConceptSimple = require('./concept-simple');
 var ConceptDetails = require('./concept-details');
@@ -286,7 +287,7 @@ module.exports = React.createClass({
             this.props.route.concept.highlighted.set(feature.properties.conceptIndex);
 
             // TODO: fix -60 hack!
-            document.getElementById('concepts-box').scrollTop = React.findDOMNode(this).offsetTop - 60;
+            document.getElementById('concepts-box').scrollTop = ReactDOM.findDOMNode(this).offsetTop - 60;
           }.bind(this));
         }.bind(this)
       });

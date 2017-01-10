@@ -4,21 +4,22 @@
   "description": "Viewer for Histograph API data",
   "main": "",
   "dependencies": {
-    "cortexjs": "^0.8.4",
-    "leaflet": "^0.7.3",
-    "react": "^0.13.3"
+    "cortexjs": "^2.1.0",
+    "leaflet": "^1.0.2",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
   },
   "devDependencies": {
-    "eslint": "^0.16.2",
+    "eslint": "^3.13.1",
     "hintify": "^0.1.0",
     "histograph-config": "histograph/config",
     "reactify": "^1.1.0",
-    "serve": "^1.4.0",
+    "serve": "^2.1.2",
     "uglifyify": "^3.0.1",
-    "watchify": "^2.4.0"
+    "watchify": "^3.8.0"
   },
   "scripts": {
-    "start": "NODE_ENV=development node viewer-config.js > config.json && watchify -d -t reactify src/index.js -o dist/bundle.js & serve",
+    "start": "NODE_ENV=development node viewer-config.js > config.json && watchify -d -t reactify src/index.js -o dist/bundle.js & serve --port 80",
     "production": "NODE_ENV=production node viewer-config.js > config.json && browserify -t reactify -g uglifyify src/index.js -o dist/bundle.js",
     "test": "eslint src/*.js src/components/*.js"
   },

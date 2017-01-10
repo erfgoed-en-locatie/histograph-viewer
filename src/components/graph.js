@@ -1,4 +1,5 @@
 var React = require('react');
+var ReactDOM = require('react-dom');
 
 module.exports = React.createClass({
   getInitialState: function() {
@@ -59,7 +60,7 @@ module.exports = React.createClass({
     var feature = geojson.features[this.props.route.getValue().concept.selected];
 
     if (feature && feature.properties) {
-      var node = React.findDOMNode(this.refs.container);
+      var node = ReactDOM.findDOMNode(this.refs.container);
       d3.select('#graph')
           .datum(feature)
           .call(this.createNodeGraph, node, this);

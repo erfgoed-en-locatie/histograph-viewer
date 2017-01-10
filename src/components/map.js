@@ -1,4 +1,6 @@
 var React = require('react');
+var ReactDOM = require('react-dom');
+
 var L = require('leaflet');
 
 module.exports = React.createClass({
@@ -12,7 +14,7 @@ module.exports = React.createClass({
     var tileUrl = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
     var attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
     var subdomains = 'abcd';
-    var map = L.map(React.findDOMNode(this).id, {
+    var map = L.map(ReactDOM.findDOMNode(this).id, {
       minZoom: 4, maxZoom: 18
     });
     var tileLayer = L.tileLayer(tileUrl, {

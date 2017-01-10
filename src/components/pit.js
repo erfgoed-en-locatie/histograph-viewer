@@ -1,4 +1,5 @@
 var React = require('react');
+var ReactDOM = require('react-dom');
 
 module.exports = React.createClass({
 
@@ -85,7 +86,7 @@ module.exports = React.createClass({
 
   componentDidMount: function() {
     if (this.refs.data) {
-      var node = React.findDOMNode(this.refs.data);
+      var node = ReactDOM.findDOMNode(this.refs.data);
       hljs.highlightBlock(node);
     }
   }

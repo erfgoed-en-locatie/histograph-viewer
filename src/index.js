@@ -1,4 +1,5 @@
 window.React = require('react');
+window.ReactDOM = require('react-dom');
 
 var util = require('util');
 var App = require('./app');
@@ -27,7 +28,7 @@ Object.keys(colorSelectors).forEach(function(selector) {
 sheet.innerHTML = css;
 document.body.appendChild(sheet);
 
-React.render(<App config={config} language={languages[config.viewer.language]} />, el);
+ReactDOM.render(<App config={config} language={languages[config.viewer.language]} />, el);
 
 Array.prototype.unique = function() {
 	var n = {};

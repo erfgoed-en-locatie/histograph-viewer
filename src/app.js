@@ -1,4 +1,6 @@
 var React = require('react');
+var ReactDOM = require('react-dom');
+
 var Results = require('./components/results');
 // var SearchOptions = require('./components/search-options');
 var Map = require('./components/map');
@@ -64,7 +66,7 @@ module.exports = React.createClass({
   },
 
   componentDidMount: function() {
-    React.findDOMNode(this.refs.searchInput).focus();
+    ReactDOM.findDOMNode(this.refs.searchInput).focus();
 
     window.onhashchange = window.onhashchange || function() {
       if (!disableHashChange) {
@@ -77,7 +79,7 @@ module.exports = React.createClass({
     }
 
     this.setState({
-      sidebarWidth: React.findDOMNode(this.refs.container).offsetWidth
+      sidebarWidth: ReactDOM.findDOMNode(this.refs.container).offsetWidth
     });
   },
 
@@ -86,7 +88,7 @@ module.exports = React.createClass({
       // TODO: Use something like React Router for hash routing?
       // TODO: add route for selection of single concept (and even PIT?)
 
-      var value = React.findDOMNode(this.refs.searchInput).value;
+      var value = ReactDOM.findDOMNode(this.refs.searchInput).value;
 
       if (value) {
         var query = this.stringToQuery(value);
@@ -224,7 +226,7 @@ module.exports = React.createClass({
 
   handleHash: function (params){
     if (params.search) {
-      React.findDOMNode(this.refs.searchInput).value = params.search;
+      ReactDOM.findDOMNode(this.refs.searchInput).value = params.search;
       this.search({keyCode: 13});
     }
   },
