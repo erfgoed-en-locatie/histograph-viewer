@@ -20,6 +20,7 @@
     "watchify": "^3.8.0"
   },
   "scripts": {
+    "prebuild": "rm -rf dist && mkdir dist",
     "start": "NODE_ENV=development node viewer-config.js > config.json && watchify -d -t [ babelify --presets [ es2015 react ] ] src/index.js -o dist/bundle.js & serve --port 80",
     "production": "NODE_ENV=production node viewer-config.js > config.json && browserify -t [ babelify --presets [ es2015 react ] ] src/index.js -o dist/bundle.js",
     "test": "eslint src/*.js src/components/*.js"
