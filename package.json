@@ -4,7 +4,7 @@
   "description": "Viewer for Histograph API data",
   "main": "",
   "dependencies": {
-    "cortexjs": "^2.1.0",
+    "cortexjs": "^0.8.4",
     "leaflet": "^1.0.2",
     "react": "^15.4.2",
     "react-dom": "^15.4.2"
