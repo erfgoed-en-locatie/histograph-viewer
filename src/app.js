@@ -202,7 +202,7 @@ module.exports = React.createClass({
     var fitBounds = this.state.route.fitBounds && this.state.route.fitBounds.getValue();
     var features = this.state.route.geojson && this.state.route.geojson.getValue().features;
     if (fitBounds && features.length) {
-      this.refs.map.fitBounds(this.refs.map.getConceptLayer());
+      this.refs.map.fitBounds(this.refs.map.getConceptLayer().getBounds());
       this.state.route.fitBounds.set(false);
     }
   },
