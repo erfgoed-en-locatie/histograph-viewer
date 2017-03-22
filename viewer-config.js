@@ -1,4 +1,4 @@
-var config = require('histograph-config');
+const config = require('histograph-config');
 
 var baseUrl = config.api.baseUrl;
 if (baseUrl.slice(-1) !== '/') {
