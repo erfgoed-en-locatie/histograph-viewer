@@ -13,7 +13,7 @@
     "hintify": "^0.1.0",
     "histograph-config": "histograph/config",
     "reactify": "^1.1.0",
-    "serve": "^1.4.0",
+    "serve": "~>7.0.0",
     "uglifyify": "^3.0.1",
     "watchify": "^2.4.0"
   },
